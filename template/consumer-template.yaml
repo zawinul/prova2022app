@@ -1,0 +1,439 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Metadata:
+    Generator: "former2"
+Description: ""
+Parameters:
+    tipodideploy:
+        Type: "String"
+        Default: "sperimentale"
+
+Resources:
+    PolicyTicketmachineLog:
+        Type: "AWS::IAM::ManagedPolicy"
+        Properties:
+            ManagedPolicyName: "AWSLambdaBasicExecutionRole-e79541c5-5848-4ca7-8800-a43722e1d419"
+            Path: "/service-role/"
+            PolicyDocument: !Sub |
+                {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Action": "logs:CreateLogGroup",
+                            "Resource": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*"
+                        },
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "logs:CreateLogStream",
+                                "logs:PutLogEvents"
+                            ],
+                            "Resource": [
+                                "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${LambdaTicketMachine}:*"
+                            ]
+                        }
+                    ]
+                }
+
+    PolicyUseDynamoCache:
+        Type: "AWS::IAM::ManagedPolicy"
+        Properties:
+            ManagedPolicyName: !Sub "use-${DynamoTableCache}"
+            Path: "/"
+            PolicyDocument: !Sub |
+                {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Sid": "VisualEditor0",
+                            "Effect": "Allow",
+                            "Action": [
+                                "dynamodb:BatchGetItem",
+                                "dynamodb:BatchWriteItem",
+                                "dynamodb:PutItem",
+                                "dynamodb:DeleteItem",
+                                "dynamodb:GetItem",
+                                "dynamodb:Scan",
+                                "dynamodb:Query",
+                                "dynamodb:UpdateItem"
+                            ],
+                            "Resource": [
+                                "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${DynamoTableCache}",
+                                "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${DynamoTableCache}/*",
+                                "arn:aws:dynamodb:${AWS::Region}::table/${DynamoTableCache}",
+                                "arn:aws:dynamodb:${AWS::Region}::table/${DynamoTableCache}/*"
+                            ]
+                        }
+                    ]
+                }
+
+    PolicyAcessTenant2:
+        Type: "AWS::IAM::ManagedPolicy"
+        Properties:
+            ManagedPolicyName: "access_tenant_a2"
+            Path: "/"
+            PolicyDocument: |
+                {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Sid": "VisualEditor1",
+                            "Effect": "Allow",
+                            "Action": [
+                                "s3:PutObject",
+                                "s3:GetObject",
+                                "s3:DeleteObjectVersion",
+                                "s3:ListBucket",
+                                "s3:DeleteObject",
+                                "s3:GetObjectVersion"
+                            ],
+                            "Resource": [
+                                "arn:aws:s3:::tenant-a2",
+                                "arn:aws:s3:::tenant-a2/*"
+                            ]
+                        }
+                    ]
+                }
+
+    RoleLambdaWebOptions:
+        Type: "AWS::IAM::Role"
+        Properties:
+            Path: "/service-role/"
+            RoleName: !Sub "${LambdaWebOptions}-role-97txfr9u"
+            AssumeRolePolicyDocument: "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"lambda.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}"
+            MaxSessionDuration: 3600
+            ManagedPolicyArns: 
+              - !Sub "arn:aws:iam::${AWS::AccountId}:policy/service-role/AWSLambdaBasicExecutionRole-5ffa078d-4ec5-447c-a747-0a58c6840116"
+
+    RoleLambdaTicketMachine:
+        Type: "AWS::IAM::Role"
+        Properties:
+            Path: "/service-role/"
+            RoleName: !Sub "${LambdaTicketMachine}-role-hj8kg50k"
+            AssumeRolePolicyDocument: "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"lambda.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}"
+            MaxSessionDuration: 3600
+            ManagedPolicyArns: 
+              - !Ref PolicyUseDynamoCache
+              - !Ref PolicyTicketmachineLog
+
+    RoleLambdaProva2022:
+        Type: "AWS::IAM::Role"
+        Properties:
+            Path: "/service-role/"
+            RoleName: !Sub "${LambdaProva2022}-role-88t3s5dv"
+            AssumeRolePolicyDocument: "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"lambda.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}"
+            MaxSessionDuration: 3600
+            ManagedPolicyArns: 
+              - !Sub "arn:aws:iam::${AWS::AccountId}:policy/service-role/AWSLambdaBasicExecutionRole-653af11e-188e-4b88-8cec-9a90893e14c8"
+
+    LambdaProva2022:
+        Type: "AWS::Lambda::Function"
+        Properties:
+            Description: ""
+            FunctionName: "prova2022Lambda"
+            Handler: "index.handler"
+            Code: 
+                S3Bucket: "prod-mxp-c0-pmgm4-tasks"
+                S3Key: !Sub "/snapshots/${AWS::AccountId}/prova2022Lambda-82d03592-ba2e-46ee-ae49-d022ac088d6a"
+                S3ObjectVersion: "dqwhWZ3Na9djBCAFv7VZbabemSY6P7Kz"
+            MemorySize: 128
+            Role: !Sub "arn:aws:iam::${AWS::AccountId}:role/service-role/prova2022Lambda-role-88t3s5dv"
+            Runtime: "nodejs14.x"
+            Timeout: 10
+            TracingConfig: 
+                Mode: "PassThrough"
+
+    LambdaTicketMachine:
+        Type: "AWS::Lambda::Function"
+        Properties:
+            Description: ""
+            FunctionName: "ticket-machine"
+            Handler: "index.handler"
+            Code: 
+                S3Bucket: "prod-mxp-c0-pmgm4-tasks"
+                S3Key: !Sub "/snapshots/${AWS::AccountId}/ticket-machine-9192d733-58db-4553-87a8-f180e820dc1c"
+                S3ObjectVersion: "i._zefgpyqoEUuLUoqbxQc4FWhYyU_T9"
+            MemorySize: 128
+            Role: !Sub "arn:aws:iam::${AWS::AccountId}:role/service-role/ticket-machine-role-hj8kg50k"
+            Runtime: "nodejs14.x"
+            Timeout: 3
+            TracingConfig: 
+                Mode: "PassThrough"
+
+    LambdaPermissionProva2022:
+        Type: "AWS::Lambda::Permission"
+        Properties:
+            Action: "lambda:InvokeFunction"
+            FunctionName: !GetAtt LambdaProva2022.Arn
+            Principal: "apigateway.amazonaws.com"
+            SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayV2Api}/*/*/prova2022lambda"
+
+    LambdaPermissionFree:
+        Type: "AWS::Lambda::Permission"
+        Properties:
+            Action: "lambda:InvokeFunction"
+            FunctionName: !GetAtt LambdaProva2022.Arn
+            Principal: "apigateway.amazonaws.com"
+            SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayV2Api}/*/*/freeProva2022Lambda"
+
+    LambdaWebOptions:
+        Type: "AWS::Lambda::Function"
+        Properties:
+            Description: ""
+            FunctionName: "prova2022WebOptions"
+            Handler: "index.handler"
+            Code: 
+                S3Bucket: "prod-mxp-c0-pmgm4-tasks"
+                S3Key: !Sub "/snapshots/${AWS::AccountId}/prova2022WebOptions-3da35271-80d8-4a29-9ba4-316a0683a969"
+                S3ObjectVersion: "rY1gWcJhqyhWIr9FJJlclErLnm8wqHQM"
+            MemorySize: 128
+            Role: !Sub "arn:aws:iam::${AWS::AccountId}:role/service-role/prova2022WebOptions-role-97txfr9u"
+            Runtime: "nodejs14.x"
+            Timeout: 3
+            TracingConfig: 
+                Mode: "PassThrough"
+
+    LambdaPermissionDefault:
+        Type: "AWS::Lambda::Permission"
+        Properties:
+            Action: "lambda:InvokeFunction"
+            FunctionName: !GetAtt LambdaWebOptions.Arn
+            Principal: "apigateway.amazonaws.com"
+            SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayV2Api}/*/$default"
+
+    DynamoTableCache:
+        Type: "AWS::DynamoDB::Table"
+        Properties:
+            AttributeDefinitions: 
+              - 
+                AttributeName: "key"
+                AttributeType: "S"
+            TableName: "public-cache"
+            KeySchema: 
+              - 
+                AttributeName: "key"
+                KeyType: "HASH"
+            ProvisionedThroughput: 
+                ReadCapacityUnits: 1
+                WriteCapacityUnits: 1
+            TimeToLiveSpecification: 
+                Enabled: false
+
+    ApiGatewayV2Api:
+        Type: "AWS::ApiGatewayV2::Api"
+        Properties:
+            ApiKeySelectionExpression: "$request.header.x-api-key"
+            ProtocolType: "HTTP"
+            RouteSelectionExpression: "$request.method $request.path"
+            DisableExecuteApiEndpoint: false
+
+    ApiRouteProva2022Lambda:
+        Type: "AWS::ApiGatewayV2::Route"
+        Properties:
+            ApiId: !Ref ApiGatewayV2Api
+            ApiKeyRequired: false
+            AuthorizationType: "JWT"
+            AuthorizerId: !Ref 
+            RouteKey: "GET /prova2022lambda"
+            Target: !Sub "integrations/${ApiIntegrationLambdaProva2022}"
+
+    ApiRouteDefault:
+        Type: "AWS::ApiGatewayV2::Route"
+        Properties:
+            ApiId: !Ref ApiGatewayV2Api
+            ApiKeyRequired: false
+            AuthorizationType: "NONE"
+            RouteKey: "$default"
+            Target: !Sub "integrations/${ApiIntegrationLambdaWebOptions}"
+
+    ApiRouteFreeLambda:
+        Type: "AWS::ApiGatewayV2::Route"
+        Properties:
+            ApiId: !Ref ApiGatewayV2Api
+            ApiKeyRequired: false
+            AuthorizationType: "NONE"
+            RouteKey: "GET /freeProva2022Lambda"
+            Target: !Sub "integrations/${ApiIntegrationLambdaProva2022}"
+
+    ApiIntegrationLambdaWebOptions:
+        Type: "AWS::ApiGatewayV2::Integration"
+        Properties:
+            ApiId: !Ref ApiGatewayV2Api
+            ConnectionType: "INTERNET"
+            IntegrationMethod: "POST"
+            IntegrationType: "AWS_PROXY"
+            IntegrationUri: !GetAtt LambdaWebOptions.Arn
+            TimeoutInMillis: 30000
+            PayloadFormatVersion: "2.0"
+
+    ApiIntegrationLambdaProva2022:
+        Type: "AWS::ApiGatewayV2::Integration"
+        Properties:
+            ApiId: !Ref ApiGatewayV2Api
+            ConnectionType: "INTERNET"
+            IntegrationMethod: "POST"
+            IntegrationType: "AWS_PROXY"
+            IntegrationUri: !GetAtt LambdaProva2022.Arn
+            TimeoutInMillis: 30000
+            PayloadFormatVersion: "2.0"
+
+    ApiIntegrationWhoAmI:
+        Type: "AWS::ApiGatewayV2::Integration"
+        Properties:
+            ApiId: !Ref ApiGatewayV2Api
+            ConnectionType: "INTERNET"
+            IntegrationMethod: "POST"
+            IntegrationType: "AWS_PROXY"
+            IntegrationUri: !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:whoAmI"
+            TimeoutInMillis: 30000
+            PayloadFormatVersion: "2.0"
+
+    ApiGatewayV2Authorizer:
+        Type: "AWS::ApiGatewayV2::Authorizer"
+        Properties:
+            ApiId: !Ref ApiGatewayV2Api
+            AuthorizerType: "JWT"
+            IdentitySource: 
+              - "$request.header.Authorization"
+            Name: "cognitoNorthVirginiaAuthorizer"
+            JwtConfiguration: 
+                Audience: 
+                  - "3u600gkmd1kp54tc454a0c441m"
+                Issuer: "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_SgNY6TTJQ"
+
+    IAMUserTicketMachine:
+        Type: "AWS::IAM::User"
+        Properties:
+            Path: "/"
+            UserName: "ticketMachineUser"
+
+    IAMPolicyAssumeTicketmachineRoles:
+        Type: "AWS::IAM::Policy"
+        Properties:
+            PolicyDocument: |
+                {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Sid": "VisualEditor0",
+                            "Effect": "Allow",
+                            "Action": "sts:assumeRole",
+                            "Resource": "*"
+                        }
+                    ]
+                }
+            Users: 
+              - "ticketMachineUser"
+            PolicyName: "assumeTichetMachineRoles"
+
+    IamRoleTenantA1Writer:
+        Type: "AWS::IAM::Role"
+        Properties:
+            Path: "/"
+            RoleName: "tenant_a1_writer"
+            AssumeRolePolicyDocument: !Sub "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"lambda.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"},{\"Effect\":\"Allow\",\"Principal\":{\"AWS\":\"arn:aws:iam::${AWS::AccountId}:user/admin\"},\"Action\":\"sts:AssumeRole\",\"Condition\":{}},{\"Effect\":\"Allow\",\"Principal\":{\"AWS\":\"arn:aws:iam::${AWS::AccountId}:user/adminWithoutMFA\"},\"Action\":\"sts:AssumeRole\",\"Condition\":{}},{\"Effect\":\"Allow\",\"Principal\":{\"AWS\":\"arn:aws:iam::${AWS::AccountId}:user/ticketMachineUser\"},\"Action\":\"sts:AssumeRole\",\"Condition\":{}}]}"
+            MaxSessionDuration: 3600
+            Description: "Allows Lambda functions to call AWS services on your behalf."
+
+    IAMRoleAccessTenantA2:
+        Type: "AWS::IAM::Role"
+        Properties:
+            Path: "/"
+            RoleName: "tenant_a2_writer"
+            AssumeRolePolicyDocument: "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"lambda.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}"
+            MaxSessionDuration: 3600
+            ManagedPolicyArns: 
+              - !Ref PolicyAcessTenant2
+            Description: "Allows Lambda functions to call AWS services on your behalf."
+
+    IAMPolicyCustomTenantA1:
+        Type: "AWS::IAM::Policy"
+        Properties:
+            PolicyDocument: |
+                {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Sid": "VisualEditor0",
+                            "Effect": "Allow",
+                            "Action": [
+                                "s3:ListAccessPoints",
+                                "s3:ListAllMyBuckets"
+                            ],
+                            "Resource": "*"
+                        },
+                        {
+                            "Sid": "VisualEditor1",
+                            "Effect": "Allow",
+                            "Action": "s3:*",
+                            "Resource": [
+                                "arn:aws:s3:::tenant-a1",
+                                "arn:aws:s3:::tenant-a1/*"
+                            ]
+                        }
+                    ]
+                }
+            Roles: 
+              - !Ref IamRoleTenantA1Writer
+            PolicyName: "custom_tenant1_policy"
+
+    IAMPolicyTickMachineAssumeRole:
+        Type: "AWS::IAM::Policy"
+        Properties:
+            PolicyDocument: |
+                {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Sid": "VisualEditor0",
+                            "Effect": "Allow",
+                            "Action": "sts:AssumeRole",
+                            "Resource": "*"
+                        }
+                    ]
+                }
+            Roles: 
+              - !Ref RoleLambdaTicketMachine
+            PolicyName: !Sub "${LambdaTicketMachine}-assume-role"
+
+    IAMPolictTickMachReadParameters:
+        Type: "AWS::IAM::Policy"
+        Properties:
+            PolicyDocument: |
+                {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Sid": "VisualEditor0",
+                            "Effect": "Allow",
+                            "Action": [
+                                "ssm:GetParameter",
+                                "ssm:GetParameters"
+                            ],
+                            "Resource": [ "*"
+                             ]
+                        }
+                    ]
+                }
+            Roles: 
+              - !Ref RoleLambdaTicketMachine
+            PolicyName: "ticketMachineReadParameters"
+
+    SSMParameterTicketMachineUserUserKeyId:
+        Type: "AWS::SSM::Parameter"
+        Properties:
+            Name: "ticketMachineUserKeyId"
+            Type: "String"
+            Value: "AKIARBQSOGSVPNIF7OZJ"
+            DataType: "text"
+            Tier: "Standard"
+
+    SSMParameterTicketMachineUserSecretAccessKey:
+        Type: "AWS::SSM::Parameter"
+        Properties:
+            Name: "ticketMachineUserSecretAccessKey"
+            Type: "String"
+            Value: "/5KL81/BVStrQfcGS2VV2yg+gvQR+QAZHce08+HO"
+            DataType: "text"
+            Tier: "Standard"
+

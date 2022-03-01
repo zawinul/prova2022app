@@ -1,0 +1,21 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Metadata:
+    Generator: "former2"
+Description: ""
+Parameters:
+    tipodideploy:
+        Type: "String"
+        Default: "sperimentale"
+
+Resources:
+    CognitoIdentityPool:
+        Type: "AWS::Cognito::IdentityPool"
+        Properties:
+            IdentityPoolName: "prova2022IdentityPool"
+            AllowUnauthenticatedIdentities: false
+            CognitoIdentityProviders: 
+              - 
+                ProviderName: !Sub "cognito-idp.${AWS::Region}.amazonaws.com/${AWS::Region}_ITMhaCaH8"
+                ClientId: "outenrfr4eegjt0h9184vkg20"
+                ServerSideTokenCheck: false
+

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+	Prova 2022 Login callback
+</body>
+
+<script>
+	var obj = {
+		type: 'authCallback',
+		href: location.href
+	};
+	if (window.opener)
+		window.opener.postMessage(JSON.stringify(obj), "*");
+	setTimeout(function() { window.close();}, 1);
+</script>
+</html>

@@ -1,0 +1,72 @@
+{
+	"version": "2.0",
+	"routeKey": "GET /prova2022lambda",
+	"rawPath": "/prod/prova2022lambda",
+	"rawQueryString": "f=0.9285623933780973",
+	"headers": {
+		"accept": "application/json, text/javascript, */*; q=0.01",
+		"accept-encoding": "gzip, deflate, br",
+		"accept-language": "it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7",
+		"authorization": "eyJraWQiOiJmV25mNTc3NXp6MGtmeHBna1lDekJQUWNieTcrZ3dPS0NDbkt6emg0MnNFPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiI5MDgyNGJhZS01NjIyLTRiODktOWRhNi1lMGVhMDI3NTViOGIiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3VzLWVhc3QtMV9TZ05ZNlRUSlEiLCJ2ZXJzaW9uIjoyLCJjbGllbnRfaWQiOiIzdTYwMGdrbWQxa3A1NHRjNDU0YTBjNDQxbSIsIm9yaWdpbl9qdGkiOiIwZDIxN2EzMC00ZjViLTRlZWQtOTMwNi1jZmI1NTMyYmQ2YTYiLCJldmVudF9pZCI6ImZlMzFlYThiLTU0OTEtNDUwNi1hZjdhLWEwMGVlMWEzNTYwMSIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoiYXdzLmNvZ25pdG8uc2lnbmluLnVzZXIuYWRtaW4gcGhvbmUgb3BlbmlkIHByb2ZpbGUgZW1haWwiLCJhdXRoX3RpbWUiOjE2NDU1MjgxNDIsImV4cCI6MTY0NTUzMTc0MiwiaWF0IjoxNjQ1NTI4MTQyLCJqdGkiOiI0MGFmZmFhMS1hNjY3LTQ4MDgtOWJjYS01ZDYxNmNmMjFjODciLCJ1c2VybmFtZSI6InBhb2xvMyJ9.P0e9ikLCKYjR96ZMcGmXYezHARpUZIMESGZ_UsjYJ09WrYvd0kW5B61E5-H-CsPJIxsRLMAy2tdJMz0YvPRuiYmgO5qJ-C8wUKjBjseAQY8-XI_ebAl9NHmr2fPad8mSBCIVPBktqb3qc0XYMEDHVssbytTUhqZFSIxFWrvqHnSp6njq2hlKvumdAW3lDuLV0rRuzi7PpEyqLNwSc3mC2EBu_f9qfZpJU2f2jb2JhS5481buXoH77VqdBxmxq6u5LKpASyO5nadtOhx7dipVfA0nutEiz-u8hCyrEDPOpM4t8Nyr4LZ_a-rC_RgqRvcMzcjOV7np0ufbrSoevsCZ5Q",
+		"content-length": "0",
+		"host": "cm6ihrd4ah.execute-api.eu-south-1.amazonaws.com",
+		"origin": "https://127.0.0.1",
+		"referer": "https://127.0.0.1/",
+		"sec-ch-ua": "\" Not A;Brand\";v=\"99\", \"Chromium\";v=\"98\", \"Google Chrome\";v=\"98\"",
+		"sec-ch-ua-mobile": "?0",
+		"sec-ch-ua-platform": "\"Windows\"",
+		"sec-fetch-dest": "empty",
+		"sec-fetch-mode": "cors",
+		"sec-fetch-site": "cross-site",
+		"user-agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36",
+		"x-amzn-trace-id": "Root=1-6214c856-4ccddee7746c2a7d6053008c",
+		"x-forwarded-for": "5.171.214.150",
+		"x-forwarded-port": "443",
+		"x-forwarded-proto": "https"
+	},
+	"queryStringParameters": {
+		"f": "0.9285623933780973"
+	},
+	"requestContext": {
+		"accountId": "071979381930",
+		"apiId": "cm6ihrd4ah",
+		"authorizer": {
+			"jwt": {
+				"claims": {
+					"auth_time": "1645528142",
+					"client_id": "3u600gkmd1kp54tc454a0c441m",
+					"event_id": "fe31ea8b-5491-4506-af7a-a00ee1a35601",
+					"exp": "1645531742",
+					"iat": "1645528142",
+					"iss": "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_SgNY6TTJQ",
+					"jti": "40affaa1-a667-4808-9bca-5d616cf21c87",
+					"origin_jti": "0d217a30-4f5b-4eed-9306-cfb5532bd6a6",
+					"scope": "aws.cognito.signin.user.admin phone openid profile email",
+					"sub": "90824bae-5622-4b89-9da6-e0ea02755b8b",
+					"token_use": "access",
+					"username": "paolo3",
+					"version": "2"
+				},
+				"scopes": null
+			}
+		},
+		"domainName": "cm6ihrd4ah.execute-api.eu-south-1.amazonaws.com",
+		"domainPrefix": "cm6ihrd4ah",
+		"http": {
+			"method": "GET",
+			"path": "/prod/prova2022lambda",
+			"protocol": "HTTP/1.1",
+			"sourceIp": "5.171.214.150",
+			"userAgent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36"
+		},
+		"requestId": "N8Q9miL4su8EMxQ=",
+		"routeKey": "GET /prova2022lambda",
+		"stage": "prod",
+		"time": "22/Feb/2022:11:26:14 +0000",
+		"timeEpoch": 1645529174848
+	},
+	"stageVariables": {
+		"prova_stage_variable": "prova123"
+	},
+	"isBase64Encoded": false
+}
