@@ -413,7 +413,7 @@ Resources:
         Properties:
             Name: "ticketMachineUserKeyId"
             Type: "String"
-            Value: "AKIARBQSOGSVPNIF7OZJ"
+            Value: "to-be-replaced"
             DataType: "text"
             Tier: "Standard"
 
@@ -422,7 +422,7 @@ Resources:
         Properties:
             Name: "ticketMachineUserSecretAccessKey"
             Type: "String"
-            Value: "/5KL81/BVStrQfcGS2VV2yg+gvQR+QAZHce08+HO"
+            Value: "to-be-replaced"
             DataType: "text"
             Tier: "Standard"
 

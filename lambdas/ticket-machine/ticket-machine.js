@@ -127,15 +127,9 @@ async function getSTS(region) {
 	var get2 = ssm.getParameter({Name: 'ticketMachineUserSecretAccessKey'});
 	var resp2 = await get2.promise();
 	var ticketMachineUserSecretAccessKey = resp2.Parameter.Value;
-	{
-		const ticketMachineUserKeyId2 = 'AKIARBQSOGSVPNIF7OZJ';
-		const ticketMachineUserSecretAccessKey2 = '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';
-		console.log(ticketMachineUserKeyId==ticketMachineUserKeyId2);
-		console.log(ticketMachineUserSecretAccessKey==ticketMachineUserSecretAccessKey2);
-		
-	}	
+	
 
-	console.log({ticketMachineUserKeyId, ticketMachineUserSecretAccessKey});
+	console.log({ticketMachineUserKeyId});
 
 
 	const sts = new AWS.STS({

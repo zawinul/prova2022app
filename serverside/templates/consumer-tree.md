@@ -1,0 +1,75 @@
+prova
+* ManagedPolicy
+	* PolicyTicketmachineLog
+		* LambdaTicketMachine
+	* PolicyUseDynamoCache
+		* DynamoTableCache
+	* PolicyAcessTenant2
+* Role
+	* RoleLambdaWebOptions
+		* LambdaWebOptions
+	* RoleLambdaTicketMachine
+		* PolicyTicketmachineLog
+		* PolicyUseDynamoCache
+		* LambdaTicketMachine
+	* RoleLambdaProva2022
+		* LambdaProva2022
+	* IamRoleTenantA1Writer
+	* IAMRoleAccessTenantA2
+		* PolicyAcessTenant2
+* Function
+	* LambdaProva2022
+	* LambdaTicketMachine
+	* LambdaWebOptions
+* Permission
+	* LambdaPermissionProva2022
+		* LambdaProva2022
+		* ApiGatewayV2Api
+	* LambdaPermissionFree
+		* LambdaProva2022
+		* ApiGatewayV2Api
+	* LambdaPermissionDefault
+		* LambdaWebOptions
+		* ApiGatewayV2Api
+* Table
+	* DynamoTableCache
+* Api
+	* ApiGatewayV2Api
+* Route
+	* ApiRouteProva2022Lambda
+		* LambdaProva2022
+		* ApiGatewayV2Api
+		* ApiIntegrationLambdaProva2022
+	* ApiRouteDefault
+		* LambdaWebOptions
+		* ApiGatewayV2Api
+		* ApiIntegrationLambdaWebOptions
+	* ApiRouteFreeLambda
+		* LambdaProva2022
+		* ApiGatewayV2Api
+		* ApiIntegrationLambdaProva2022
+* Integration
+	* ApiIntegrationLambdaWebOptions
+		* LambdaWebOptions
+		* ApiGatewayV2Api
+	* ApiIntegrationLambdaProva2022
+		* LambdaProva2022
+		* ApiGatewayV2Api
+* Authorizer
+	* ApiGatewayV2Authorizer
+		* ApiGatewayV2Api
+* User
+	* IAMUserTicketMachine
+* Policy
+	* IAMPolicyAssumeTicketmachineRoles
+	* IAMPolicyCustomTenantA1
+		* IamRoleTenantA1Writer
+	* IAMPolicyTickMachineAssumeRole
+		* RoleLambdaTicketMachine
+		* LambdaTicketMachine
+	* IAMPolictTickMachReadParameters
+		* RoleLambdaTicketMachine
+		* LambdaTicketMachine
+* Parameter
+	* SSMParameterTicketMachineUserUserKeyId
+	* SSMParameterTicketMachineUserSecretAccessKey

@@ -1,0 +1,64 @@
+{
+  "version": "16.0.0",
+  "artifacts": {
+    "Tree": {
+      "type": "cdk:tree",
+      "properties": {
+        "file": "tree.json"
+      }
+    },
+    "LaboratorioStack.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "LaboratorioStack.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "LaboratorioStack": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://071979381930/eu-west-3",
+      "properties": {
+        "templateFile": "LaboratorioStack.template.json",
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::071979381930:role/cdk-hnb659fds-deploy-role-071979381930-eu-west-3",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::071979381930:role/cdk-hnb659fds-cfn-exec-role-071979381930-eu-west-3",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-071979381930-eu-west-3/b0ef585f9a5f632e4f86f7c23bbd27d2cb9f5387d123915b026009edeb0abc80.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "LaboratorioStack.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::071979381930:role/cdk-hnb659fds-lookup-role-071979381930-eu-west-3",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "LaboratorioStack.assets"
+      ],
+      "metadata": {
+        "/LaboratorioStack/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/LaboratorioStack/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/LaboratorioStack/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "LaboratorioStack"
+    }
+  }
+}

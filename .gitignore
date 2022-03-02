@@ -25,6 +25,7 @@ packages/
 *.pm~
 *.xml~
 *.t~
+*.secret.json
 
 /target
 /generated-files
@@ -35,3 +36,4 @@ packages/
 *.csproj.user
 *.pyc
 __pycache__
+serverside/prova-cdk/test1.7z

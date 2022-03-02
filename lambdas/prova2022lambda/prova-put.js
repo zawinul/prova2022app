@@ -26,16 +26,13 @@ function bothCaseFields(obj) {
 async function testS3(event) {
 	const Bucket = 'tenant-a1';
 
-	const adminWithoutMFAKeyId = 'AKIARBQSOGSVGTQSKJ7P';
-	const adminWithoutMFASecretAccessKey = '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';
+	var secret = require('./prova-put.secret.json');
 
-	const tenant1KeyId = "AKIARBQSOGSVEBOWJ6NE";
-	const tenant1SecretAccessKey = "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";
 
 	const sts = new AWS.STS({
 		apiVersion: '2011-06-15',
-		accessKeyId: adminWithoutMFAKeyId,
-		secretAccessKey: adminWithoutMFASecretAccessKey,
+		accessKeyId: secret.adminWithoutMFAKeyId,
+		secretAccessKey: secret.adminWithoutMFASecretAccessKey,
 		endpoint:'https://sts.eu-south-1.amazonaws.com',
 		region:'eu-south-1'
 	});

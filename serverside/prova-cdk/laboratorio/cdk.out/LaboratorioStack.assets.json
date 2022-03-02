@@ -1,0 +1,20 @@
+{
+  "version": "16.0.0",
+  "files": {
+    "b0ef585f9a5f632e4f86f7c23bbd27d2cb9f5387d123915b026009edeb0abc80": {
+      "source": {
+        "path": "LaboratorioStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "071979381930-eu-west-3": {
+          "bucketName": "cdk-hnb659fds-assets-071979381930-eu-west-3",
+          "objectKey": "b0ef585f9a5f632e4f86f7c23bbd27d2cb9f5387d123915b026009edeb0abc80.json",
+          "region": "eu-west-3",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::071979381930:role/cdk-hnb659fds-file-publishing-role-071979381930-eu-west-3"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}
