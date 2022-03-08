@@ -1,0 +1,81 @@
+{
+	"Resources": {
+	  "Test2JsQueue2B5810EF2": {
+		"Type": "AWS::SQS::Queue",
+		"Properties": {
+		  "QueueName": "test2JsStackParis",
+		  "VisibilityTimeout": 300
+		},
+		"UpdateReplacePolicy": "Delete",
+		"DeletionPolicy": "Delete",
+		"Metadata": {
+		  "aws:cdk:path": "Test2JsStack/Test2JsQueue2/Resource"
+		}
+	  },
+	  "tenanta1oncdkFC1F4084": {
+		"Type": "AWS::S3::Bucket",
+		"Properties": {
+		  "BucketName": "tenant-a1"
+		},
+		"UpdateReplacePolicy": "Retain",
+		"DeletionPolicy": "Retain",
+		"Metadata": {
+		  "aws:cdk:path": "Test2JsStack/tenant-a1-on-cdk/Resource"
+		}
+	  },
+	  "tenanta2oncdk8C91FAA6": {
+		"Type": "AWS::S3::Bucket",
+		"Properties": {
+		  "BucketName": "tenant-a2"
+		},
+		"UpdateReplacePolicy": "Retain",
+		"DeletionPolicy": "Retain",
+		"Metadata": {
+		  "aws:cdk:path": "Test2JsStack/tenant_a2_on_cdk/Resource"
+		}
+	  },
+	  "CDKMetadata": {
+		"Type": "AWS::CDK::Metadata",
+		"Properties": {
+		  "Analytics": "v2:deflate64:H4sIAAAAAAAA/zPSMzTVM1BMLC/WTU7J1s3JTNKrDi5JTM7WAQrFVxcXFutVB5amlqbqOKflgRm1OsXGetVOpcnZqSUgQQirthbEDkotzi8tSgaqyctPSdXLKtYvMzTSM7TQM1bMKs7M1C0qzSvJzE3VC4LQAEx/ua19AAAA"
+		},
+		"Metadata": {
+		  "aws:cdk:path": "Test2JsStack/CDKMetadata/Default"
+		}
+	  }
+	},
+	"Parameters": {
+	  "BootstrapVersion": {
+		"Type": "AWS::SSM::Parameter::Value<String>",
+		"Default": "/cdk-bootstrap/hnb659fds/version",
+		"Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+	  }
+	},
+	"Rules": {
+	  "CheckBootstrapVersion": {
+		"Assertions": [
+		  {
+			"Assert": {
+			  "Fn::Not": [
+				{
+				  "Fn::Contains": [
+					[
+					  "1",
+					  "2",
+					  "3",
+					  "4",
+					  "5"
+					],
+					{
+					  "Ref": "BootstrapVersion"
+					}
+				  ]
+				}
+			  ]
+			},
+			"AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+		  }
+		]
+	  }
+	}
+  }

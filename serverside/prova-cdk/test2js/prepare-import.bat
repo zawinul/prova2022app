@@ -1,0 +1,1 @@
+node merge-import.js > prepared-import.json

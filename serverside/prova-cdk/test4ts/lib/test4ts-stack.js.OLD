@@ -1,0 +1,23 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Test4TsStack = void 0;
+const cdk = require("aws-cdk-lib");
+const aws_cdk_lib_1 = require("aws-cdk-lib");
+const sqs = require("aws-cdk-lib/aws-sqs");
+const iam = require("aws-cdk-lib/aws-iam");
+class Test4TsStack extends aws_cdk_lib_1.Stack {
+    constructor(scope, id, props) {
+        super(scope, id, props);
+        // The code that defines your stack goes here
+        // example resource
+        const queue = new sqs.Queue(this, 'Test4TsQueue', {
+            visibilityTimeout: cdk.Duration.seconds(300)
+        });
+        const role = new iam.Role(this, "bla bla", {
+            assumedBy: new iam.ServicePrincipal('sns.amazonaws.com'),
+            roleName: "pippo"
+        });
+    }
+}
+exports.Test4TsStack = Test4TsStack;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidGVzdDR0cy1zdGFjay5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbInRlc3Q0dHMtc3RhY2sudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7O0FBQUEsbUNBQW1DO0FBQ25DLDZDQUFnRDtBQUVoRCwyQ0FBMkM7QUFDM0MsMkNBQTJDO0FBRTNDLE1BQWEsWUFBYSxTQUFRLG1CQUFLO0lBQ3RDLFlBQVksS0FBZ0IsRUFBRSxFQUFVLEVBQUUsS0FBa0I7UUFDM0QsS0FBSyxDQUFDLEtBQUssRUFBRSxFQUFFLEVBQUUsS0FBSyxDQUFDLENBQUM7UUFFeEIsNkNBQTZDO1FBRTdDLG1CQUFtQjtRQUNuQixNQUFNLEtBQUssR0FBRyxJQUFJLEdBQUcsQ0FBQyxLQUFLLENBQUMsSUFBSSxFQUFFLGNBQWMsRUFBRTtZQUNqRCxpQkFBaUIsRUFBRSxHQUFHLENBQUMsUUFBUSxDQUFDLE9BQU8sQ0FBQyxHQUFHLENBQUM7U0FDNUMsQ0FBQyxDQUFDO1FBR0gsTUFBTSxJQUFJLEdBQUcsSUFBSSxHQUFHLENBQUMsSUFBSSxDQUFDLElBQUksRUFBRSxTQUFTLEVBQUU7WUFDMUMsU0FBUyxFQUFFLElBQUksR0FBRyxDQUFDLGdCQUFnQixDQUFDLG1CQUFtQixDQUFDO1lBQ3hELFFBQVEsRUFBRSxPQUFPO1NBQ2pCLENBQUMsQ0FBQztJQUNKLENBQUM7Q0FDRDtBQWpCRCxvQ0FpQkMiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgKiBhcyBjZGsgZnJvbSAnYXdzLWNkay1saWInO1xuaW1wb3J0IHsgU3RhY2ssIFN0YWNrUHJvcHMgfSBmcm9tICdhd3MtY2RrLWxpYic7XG5pbXBvcnQgeyBDb25zdHJ1Y3QgfSBmcm9tICdjb25zdHJ1Y3RzJztcbmltcG9ydCAqIGFzIHNxcyBmcm9tICdhd3MtY2RrLWxpYi9hd3Mtc3FzJztcbmltcG9ydCAqIGFzIGlhbSBmcm9tICdhd3MtY2RrLWxpYi9hd3MtaWFtJztcblxuZXhwb3J0IGNsYXNzIFRlc3Q0VHNTdGFjayBleHRlbmRzIFN0YWNrIHtcblx0Y29uc3RydWN0b3Ioc2NvcGU6IENvbnN0cnVjdCwgaWQ6IHN0cmluZywgcHJvcHM/OiBTdGFja1Byb3BzKSB7XG5cdFx0c3VwZXIoc2NvcGUsIGlkLCBwcm9wcyk7XG5cblx0XHQvLyBUaGUgY29kZSB0aGF0IGRlZmluZXMgeW91ciBzdGFjayBnb2VzIGhlcmVcblxuXHRcdC8vIGV4YW1wbGUgcmVzb3VyY2Vcblx0XHRjb25zdCBxdWV1ZSA9IG5ldyBzcXMuUXVldWUodGhpcywgJ1Rlc3Q0VHNRdWV1ZScsIHtcblx0XHRcdHZpc2liaWxpdHlUaW1lb3V0OiBjZGsuRHVyYXRpb24uc2Vjb25kcygzMDApXG5cdFx0fSk7XG5cblx0XHRcblx0XHRjb25zdCByb2xlID0gbmV3IGlhbS5Sb2xlKHRoaXMsIFwiYmxhIGJsYVwiLCB7XG5cdFx0XHRhc3N1bWVkQnk6IG5ldyBpYW0uU2VydmljZVByaW5jaXBhbCgnc25zLmFtYXpvbmF3cy5jb20nKSxcblx0XHRcdHJvbGVOYW1lOiBcInBpcHBvXCJcblx0XHR9KTtcblx0fVxufVxuIl19

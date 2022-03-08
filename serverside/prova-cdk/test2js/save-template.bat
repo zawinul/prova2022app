@@ -1,0 +1,1 @@
+copy cdk.out\Test2JsStack.template.json .\last-template.json

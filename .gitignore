@@ -31,7 +31,9 @@ packages/
 
 
 **/node_modules
+**/localmaven
 **/.gradle/
+**/cdk.out/
 *.csproj.user
 *.pyc
 __pycache__
