@@ -2,18 +2,16 @@
 
 const cdk = require('aws-cdk-lib');
 //const { ProvaCdkStack } = require('../lib/prova-cdk-stack');
-const { ProvaCdkTenantsStack } = require('../lib/prova-cdk-tenants');
-const { ProvaCdkTicketMachineStack } = require('../lib/prova-cdk-tm');
-
+const ProvaCdkTenantsStack  = require('../lib/prova-cdk-tenants');
+const ProvaCdkTicketMachineStack = require('../lib/prova-cdk-tm');
+const ProvaCdkApiStack = require('../lib/prova-cdk-api');
+const config = require('../config.js');
 const app = new cdk.App();
 
-const tenants = new ProvaCdkTenantsStack(app, 'T1-TENANTS', {
-  	env: { account: '071979381930', region: 'eu-south-1' }
-});
 
-const ticketMachine = new ProvaCdkTicketMachineStack (app, 'T1-TICKET-MACHINE', {
-	env: { account: '071979381930', region: 'eu-south-1',  },
-	bbb:222,
-	tenants: tenants.map
-	
-});
+const tenants = new ProvaCdkTenantsStack(app, config.namePrefix+'-TENANTS', config);
+config.tenants = tenants.map;
+
+const ticketMachine = new ProvaCdkTicketMachineStack (app, config.namePrefix+'-TICKET-MACHINE',config);
+
+const api = new ProvaCdkApiStack(app, config.namePrefix+'-API',config);

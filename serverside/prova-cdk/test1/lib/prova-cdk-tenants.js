@@ -1,25 +1,20 @@
 const cdk = require('aws-cdk-lib');
-const { Stack, Duration } = require('aws-cdk-lib');
 const s3 = require("aws-cdk-lib/aws-s3");
 const iam = require("aws-cdk-lib/aws-iam");
 
-const objlog = x=>console.log(JSON.stringify(x,null,4));
-
-class ProvaCdkTenantsStack extends Stack {
+class ProvaCdkTenantsStack extends cdk.Stack {
 
 	constructor(scope, id, props) {
 		super(scope, id, props);
-		
-		var buckets = [];
-		var tenantPolicies = [];
-		var tenantRoles = [];
-		var tenantRolesARN = [];
-		var tenantNames = ['madrid', 'lisbona', 'lione'];
+		var prefix = props.namePrefix;
+		var tenantNames = props.tenants;
+
+		const policyArn = policyName=>`arn:aws:iam::${props.env.account}:policy/${policyName}`;
 
 		var map = {};
 
 		for (let tenant of tenantNames) {
-			var bucketName = "test1-tenant-" + tenant;
+			var bucketName = prefix.toLowerCase()+"-tenant-" + tenant;
 			let bucket = new s3.Bucket(this, bucketName, {
 				bucketName: bucketName,
 				removalPolicy: cdk.RemovalPolicy.DESTROY
@@ -43,9 +38,10 @@ class ProvaCdkTenantsStack extends Stack {
 				],
 				effect: iam.Effect.ALLOW
 			});
-			let accessPolicyName = `${tenant}-access-policy`;
+			let accessPolicyName = `${prefix}-${tenant}-access-policy`;
 			let accessPolicy = new iam.ManagedPolicy(this, accessPolicyName, {
 				managedPolicyName: accessPolicyName,
+				removalPolicy: cdk.RemovalPolicy.DESTROY,
 				document: new iam.PolicyDocument({
 					statements: [stat1, stat2]
 				})
@@ -63,4 +59,4 @@ class ProvaCdkTenantsStack extends Stack {
 
 
 
-module.exports = { ProvaCdkTenantsStack }
+module.exports = ProvaCdkTenantsStack; 
