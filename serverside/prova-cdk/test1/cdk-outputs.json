@@ -1,0 +1,14 @@
+{
+  "T9312-TENANTS": {
+    "ExportsOutputRefT9312sassariaccesspolicy3EE3B38D6680A858": "arn:aws:iam::071979381930:policy/T9312-sassari-access-policy",
+    "ExportsOutputRefT9312nuoroaccesspolicyBF5544BFB516BBD9": "arn:aws:iam::071979381930:policy/T9312-nuoro-access-policy",
+    "ExportsOutputRefT9312cagliariaccesspolicyF49D6344D0C9ED95": "arn:aws:iam::071979381930:policy/T9312-cagliari-access-policy"
+  },
+  "T9312-TICKET-MACHINE": {
+    "ExportsOutputFnGetAttT9312ticketmachinehandlerBFE7EF7FArnB2A99A5E": "arn:aws:lambda:eu-south-1:071979381930:function:T9312-ticket-machine-handler"
+  },
+  "T9312-API": {
+    "output1": "https://h9dpfo7d4i.execute-api.eu-south-1.amazonaws.com/",
+    "T9312TESTAPIEndpoint5083A8EF": "https://h9dpfo7d4i.execute-api.eu-south-1.amazonaws.com/prod/"
+  }
+}

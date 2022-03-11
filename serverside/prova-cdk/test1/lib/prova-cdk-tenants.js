@@ -13,6 +13,7 @@ class ProvaCdkTenantsStack extends cdk.Stack {
 
 		var map = {};
 
+		
 		for (let tenant of tenantNames) {
 			var bucketName = prefix.toLowerCase()+"-tenant-" + tenant;
 			let bucket = new s3.Bucket(this, bucketName, {

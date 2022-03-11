@@ -4,6 +4,7 @@ module.exports = {
 		region:'eu-south-1'	
 	},
 	namePrefix: 'T9312', 
+	sourceSecret: 's876fs8PiQaHGFdi8kjdh98',
 	tenants: [
 		'cagliari', 'nuoro', 'sassari'
 	]
