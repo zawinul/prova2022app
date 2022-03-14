@@ -6,6 +6,6 @@ module.exports = {
 	namePrefix: 'T9312', 
 	sourceSecret: 's876fs8PiQaHGFdi8kjdh98',
 	tenants: [
-		'cagliari', 'nuoro', 'sassari'
+		'nord', 'sud', 'centro', 'isole'
 	]
 }

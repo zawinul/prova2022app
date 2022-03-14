@@ -6,11 +6,10 @@ const UserPoolId = 'us-east-1_SgNY6TTJQ';
 const ClientId = '3u600gkmd1kp54tc454a0c441m';
 const CognitoDomain = 'https://prova2022b.auth.us-east-1.amazoncognito.com';
 
-const APIId_1 = 'cm6ihrd4ah'; // versione 1 prova2022Web
-const APIId_2 = 'h9dpfo7d4i'; // versione 2 T9312-TEST-API
+const APIId = 'cqdefoehd6'; 
 const APIRegion = 'eu-south-1';
 const APIStage = 'prod';
-const APIUrl = `https://${APIId_2}.execute-api.${APIRegion}.amazonaws.com/${APIStage}`;
+const APIUrl = `https://${APIId}.execute-api.${APIRegion}.amazonaws.com/${APIStage}`;
 
 var id_token, access_token, refresh_token, expires_in;
 var loginCallBack = location.origin+location.pathname+'auth-callback.html';
