@@ -1,12 +1,15 @@
-#!/usr/bin/env node
+
 
 const cdk = require('aws-cdk-lib');
-//const { ProvaCdkStack } = require('../lib/prova-cdk-stack');
 const ProvaCdkTenantsStack  = require('../lib/prova-cdk-tenants');
 const ProvaCdkTicketMachineStack = require('../lib/prova-cdk-tm');
 const ProvaCdkApiStack = require('../lib/prova-cdk-api');
+const ProvaEc2MachineStack = require('../lib/prova-cdk-ec2');
+const ProvaVpcStack = require('../lib/prova-cdk-vpc');
+
 const config = require('../config.js');
 const app = new cdk.App();
+
 
 function buildApp() {
 	const tenantProps = Object.assign({}, config);
@@ -29,10 +32,22 @@ function buildApp() {
 		ticketMachineLambdaSource: 'api-lambda',
 		ticketMachineLambdaSecret: tmSecret
 	});
-	console.log({ apiProps });
+	//console.log({ apiProps });
 	const api = new ProvaCdkApiStack(app, config.namePrefix+'-API', apiProps);
 
 	ticketMachine.lambda.grantInvoke(api.lambda);
+
+	const vpcProps = Object.assign({}, config, {
+	});
+	const vpc = new ProvaVpcStack(app, config.namePrefix+'-VPC', vpcProps);
+
+	const ec2Props = Object.assign({}, config, {
+		vpcId: vpc.vpcId,
+		publicSubnetId: vpc.publicSubnetId,
+		publicSubnetZone: vpc.publicSubnetZone
+	});
+	const tomcat = new ProvaEc2MachineStack(app, config.namePrefix+'-EC2', ec2Props);
+
 }
 
 console.log('building app...');

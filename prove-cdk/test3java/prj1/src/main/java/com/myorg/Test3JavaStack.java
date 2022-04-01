@@ -13,7 +13,9 @@ import software.amazon.awscdk.services.s3.Bucket;
 import software.amazon.awscdk.services.ssm.StringParameterProps;
 import software.amazon.awscdk.services.ssm.StringParameter;
 import software.amazon.awscdk.services.lambda.Function;
-
+import software.amazon.awscdk.services.ec2.IMachineImage;
+import software.amazon.awscdk.services.ec2.Instance;;
+import software.amazon.awscdk.services.ec2.MachineImage;
 import software.constructs.Construct;
 
 public class Test3JavaStack extends Stack {
@@ -54,13 +56,13 @@ public class Test3JavaStack extends Stack {
 			tenantRoles.add(r);
 			tenantRolesARN.add(r.getRoleArn());
         }
+        IMachineImage m;
+        
+        Instance inst = Instance.Builder.create(this, "AAA")
+        		.machineImage(machineImage)
+        		.build();
         
 		ManagedPolicy assumeRolesPolicy = PolicyHelper.getAssumeRolePolicy(tenantRolesARN, "test3-assume-role-policy", this);
 		//user.addManagedPolicy(assumeRolesPolicy);
 		
-		Function f = Function.Builder.create(this,  "aaa")
-				.
-				.build();
-		
-    }
 }

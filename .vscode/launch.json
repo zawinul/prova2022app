@@ -14,6 +14,19 @@
 			"type": "pwa-node"
 		},
 		{
+			"name": "synth",
+			"request": "launch",
+			"type": "node",
+			"skipFiles": [
+				"<node_internals>/**"
+			],
+			"cwd" : "${workspaceFolder}/cdk", 
+			"args": [
+				"${workspaceFolder}/cdk/node_modules/aws-cdk/bin/cdk.js",
+				"synth"
+			]
+		},
+		{
 			"name": "test tm",
 			"program": "${workspaceFolder}/lambdas/ticket-machine/test-tm.js",
 			"request": "launch",
