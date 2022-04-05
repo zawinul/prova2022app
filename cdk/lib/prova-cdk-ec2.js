@@ -43,15 +43,17 @@ class ProvaEc2MachineStack extends cdk.Stack {
 			tenancy: "default",
 			//subnetId: props.publicSubnetId,
 			ebsOptimized: true,
-			// securityGroupIds: [
-			// 	WebServerSecurityGroup.ref
-			// ],
 			networkInterfaces: [{
 				deviceIndex:'0',
 				associatePublicIpAddress: true,
 				deleteOnTermination: true,
-				subnetId: props.publicSubnetId
+				subnetId: props.publicSubnetId,
+				GroupSet: [WebServerSecurityGroup.ref]
 			}],
+			// securityGroupIds: [
+            //     WebServerSecurityGroup.ref
+            // ],
+
 			sourceDestCheck: true,
 			// blockDeviceMappings: [
 			// 	{
@@ -120,7 +122,23 @@ class ProvaEc2MachineStack extends cdk.Stack {
 		// 		deleteOnTermination: true
 		// 	});
 
+		new cdk.CfnOutput(this, 'tomcat-ip', {
+			value: TomcatMachine.attrPublicIp,
+			description:'aeiou',
+			exportName: 'export-tomcat-ip'
+		});
+	
+		
+		new cdk.CfnOutput(this, 'tomcat-dns', {
+			value: `DNS=${TomcatMachine.attrPublicDnsName}`,
+			description:'aeiou',
+			exportName: 'export-tomcat-dns'
+		});
+	
+
 	}
+
+
 }
 
 function rule(ip, prot, portRange) {
