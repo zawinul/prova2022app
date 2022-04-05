@@ -1,10 +1,19 @@
 {
-  "T9312-VPC": {
-    "ExportsOutputRefT9312public4C9C3117": "subnet-0aea0339a0f30f99c",
-    "ExportsOutputRefT9312webvpcB6652FF5": "vpc-01780d6c66281cf03"
+  "T9312-STATICWEB": {
+    "distribution": "\n\tdistributionDomainName: d1swntl9hj560d.cloudfront.net,\n\tdistributionId: E1870XT5WHIARI,\n\tdomainName: d1swntl9hj560d.cloudfront.net",
+    "staticweburl": "http://t9312-staticweb.s3-website.eu-south-1.amazonaws.com"
   },
-  "T9312-EC2": {
-    "tomcatip": "35.152.43.95",
-    "tomcatdns": "DNS="
+  "T9312-TENANTS": {
+    "ExportsOutputRefT9312isoleaccesspolicy0A65EA5A89A3860D": "arn:aws:iam::071979381930:policy/T9312-isole-access-policy",
+    "ExportsOutputRefT9312centroaccesspolicy31E8090A44F9B10D": "arn:aws:iam::071979381930:policy/T9312-centro-access-policy",
+    "ExportsOutputRefT9312sudaccesspolicy032A6C54521B002E": "arn:aws:iam::071979381930:policy/T9312-sud-access-policy",
+    "ExportsOutputRefT9312nordaccesspolicy5DE621BF280D7BDF": "arn:aws:iam::071979381930:policy/T9312-nord-access-policy"
+  },
+  "T9312-TICKET-MACHINE": {
+    "ExportsOutputFnGetAttT9312ticketmachinehandlerBFE7EF7FArnB2A99A5E": "arn:aws:lambda:eu-south-1:071979381930:function:T9312-ticket-machine-handler"
+  },
+  "T9312-API": {
+    "output1": "https://kb2bc38pp7.execute-api.eu-south-1.amazonaws.com/",
+    "T9312TESTAPIEndpoint5083A8EF": "https://kb2bc38pp7.execute-api.eu-south-1.amazonaws.com/prod/"
   }
 }
