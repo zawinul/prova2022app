@@ -1,5 +1,8 @@
 const https = require('https');
-
+const crypto = require('crypto');
+const querystring = require('querystring');
+ const jose = require('jose');
+ 
 const tojson = x=>JSON.stringify(x,null,2);
 
 function now() {
@@ -9,8 +12,16 @@ function now() {
 function doHttpsRequest(url, options, dataToSend) {
 	if (!options)
 		options = {};
-
-
+	if (!options.headers)
+		options.headers = {};
+		
+	if (dataToSend) {
+		if (typeof (dataToSend)!='string') {
+			options.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+			dataToSend = new URLSearchParams(dataToSend).toString();
+		}
+		options.headers['Content-Length'] = dataToSend.length;
+	}
 	//console.log({ doRequest: { url, options, data: dataToSend } });
 
 	return new Promise((resolve, reject) => {
@@ -35,7 +46,6 @@ function doHttpsRequest(url, options, dataToSend) {
 			reject(error);
 		});
 		if (dataToSend) {
-			//console.log({dataToSend});
 			req.write(dataToSend);
 		}
 		req.end();
@@ -63,9 +73,33 @@ function setupLogObj() {
 		logmsg.push(arr.join(', '));
 	};
 }
+
 function getLogMessages() {
 	return logmsg;
 }
+
+function generateRandomString(length) {
+	var text = "";
+	var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+	for (var i = 0; i < length; i++) {
+		text += possible.charAt(Math.floor(Math.random() * possible.length));
+	}
+
+	return text;
+}
+
+async function generateCodeChallenge(codeVerifier) {
+	// const ec = new TextEncoder();
+	// const encoded = ec.encode(codeVerifier);
+	// const digest = await subtle.digest('SHA-256', encoded);
+	//return btoa(String.fromCharCode(...new Uint8Array(digest)))
+	const hash = crypto.createHash('sha256').update(codeVerifier).digest('base64')
+	.replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_')
+
+	return hash;
+}	
+	
 
 module.exports = {
 	doHttpsRequest,
@@ -74,5 +108,7 @@ module.exports = {
 	btoa,
 	now,
 	setupLogObj,
-	getLogMessages
+	getLogMessages,
+	generateRandomString,
+	generateCodeChallenge
 }

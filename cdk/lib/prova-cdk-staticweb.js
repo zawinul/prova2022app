@@ -19,7 +19,7 @@ class ProvaCdkStaticwebStack extends cdk.Stack {
 
 		const deployment = new s3Deployment.BucketDeployment(this, prefix + "-deploy-web", {
 			removalPolicy: cdk.RemovalPolicy.DESTROY,
-			sources: [s3Deployment.Source.asset("./website")],
+			sources: [s3Deployment.Source.asset("../web")],
 			destinationBucket: myBucket,
 			retainOnDelete: false
 		});
@@ -37,13 +37,14 @@ class ProvaCdkStaticwebStack extends cdk.Stack {
 			exportName: 'static-web-url'
 		});
 
+		new cdk.CfnOutput(this, 'distributionURL', {
+			value: `https://${distribution.domainName}`,
+			exportName: 'distributionURL'
+		});
 
-		new cdk.CfnOutput(this, 'distribution', {
-			value: `
-	distributionDomainName: ${distribution.distributionDomainName},
-	distributionId: ${distribution.distributionId},
-	domainName: ${distribution.domainName}`,
-			exportName: 'distribution'
+		new cdk.CfnOutput(this, 'distributionID', {
+			value: distribution.distributionId,
+			exportName: 'distributionId'
 		});
 
 

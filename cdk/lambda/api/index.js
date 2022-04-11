@@ -1,4 +1,5 @@
 
+/*
 const AWS = require('aws-sdk');
 const utils = require('./utils2022.js');
 
@@ -100,3 +101,5 @@ exports.handler = async (event, context) => {
 	return ret;
 
 };
+
+*/

@@ -1,6 +1,7 @@
 module.exports = {
 	includeVPC: false,
 	includeEc2: false,
+	includeStaticWeb:false,
 	env: {
 		account: '071979381930',
 		region:'eu-south-1'	

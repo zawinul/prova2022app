@@ -37,10 +37,12 @@ function buildApp() {
 
 	ticketMachine.lambda.grantInvoke(api.lambda);
 
-	const webProps = Object.assign({}, config, {
-	});
-	const staticweb = new ProvaCdkStaticwebStack(app, config.namePrefix+'-STATICWEB', webProps);
-
+	if (config.includeStaticWeb) {
+		const webProps = Object.assign({}, config, {
+		});
+		const staticweb = new ProvaCdkStaticwebStack(app, config.namePrefix+'-STATICWEB', webProps);
+	}
+	
 	if (config.includeVPC) {
 		const vpcProps = Object.assign({}, config, {
 		});

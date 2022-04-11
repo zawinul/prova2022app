@@ -1,8 +1,4 @@
 {
-  "T9312-STATICWEB": {
-    "distribution": "\n\tdistributionDomainName: d1swntl9hj560d.cloudfront.net,\n\tdistributionId: E1870XT5WHIARI,\n\tdomainName: d1swntl9hj560d.cloudfront.net",
-    "staticweburl": "http://t9312-staticweb.s3-website.eu-south-1.amazonaws.com"
-  },
   "T9312-TENANTS": {
     "ExportsOutputRefT9312isoleaccesspolicy0A65EA5A89A3860D": "arn:aws:iam::071979381930:policy/T9312-isole-access-policy",
     "ExportsOutputRefT9312centroaccesspolicy31E8090A44F9B10D": "arn:aws:iam::071979381930:policy/T9312-centro-access-policy",

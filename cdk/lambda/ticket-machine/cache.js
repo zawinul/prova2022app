@@ -1,15 +1,12 @@
 	const AWS = require('aws-sdk');
 
-	const KEYFIELD = 'key';
-	const VALUEFIELD = 'value';
-	const EXPIREFIELD = 'expire';
 	const TABLENAME = process.env.cacheTableName;
 
 	
 	function init() {
 		const region  = process.env.region;
 		const account = process.env.account;
-		var dbclient;
+		var dbclient, docdbclient;
 
 		function getClient() {
 			if (!dbclient)
@@ -18,27 +15,40 @@
 			return dbclient;
 		}
 
+		function getDocClient() {
+			if (!dbclient)
+				dbclient = new AWS.DynamoDB({region});
+
+			if (!docdbclient)
+			docdbclient = new AWS.DynamoDB.DocumentClient({service:dbclient });
+			return docdbclient;
+		}
+
 		async function set(key, value, timeToLiveMs) {
 
 			await deleteExistingItem(key);
+			let Item = {
+				key,
+				value
+			};
 
+			if (timeToLiveMs) {
+				var expireTimestamp = (new Date()).getTime() + timeToLiveMs;
+				Item.expire = expireTimestamp;
+				Item['readable-expire'] = new Date(expireTimestamp).toString();
+			}
+			var params = {
+				TableName : TABLENAME,
+				Item	
+			};
 			try {
-				var Item = {};
-				Item[KEYFIELD] = { S: key };
-				Item[VALUEFIELD] = { S: JSON.stringify(value) };
-				if (timeToLiveMs) {
-					var expireTimestamp = (new Date()).getTime() + timeToLiveMs;
-					Item[EXPIREFIELD] = { "N": expireTimestamp.toString() }
-					Item['readable-expire'] = { "S": new Date(expireTimestamp).toString() }
-				}
-				var params = {
-					Item,
-					TableName: TABLENAME
-				}
-				await getClient().putItem(params).promise();
+				console.log('before cache put');
+				await getDocClient().put(params).promise();
+				console.log('after cache put');
+
 				return true;
-			} catch (err) {
-				console.log({err});
+			} catch(e) {
+				console.log({cachePutError:e});
 				return false;
 			}
 		}
@@ -46,7 +56,7 @@
 		async function deleteExistingItem(key) {
 			try {
 				var params = { Key: {}, TableName: TABLENAME };
-				params.Key[KEYFIELD] = { S: key };
+				params.Key.key = { S: key };
 				await getClient().deleteItem(params).promise();
 				return true;
 			} catch (err) {
@@ -56,23 +66,30 @@
 		}
 
 		async function get(key) {
+			var params = {
+				TableName : TABLENAME,
+				Key: { key:key }
+			};
+			console.log('par='+JSON.stringify(params))
+			let data;
 			try {
-				var params = { Key: {}, TableName: TABLENAME };
-				params.Key[KEYFIELD] = { S: key };
-				var data = await getClient().getItem(params).promise();
-				var expire = (data.Item.expire ? data.Item.expire.N-0 : 0);
-				var now = new Date().getTime();
-				if (expire>0 && expire < now) {
-					await deleteExistingItem(key);
-					return null;
-				}
-				var value = data.Item.value.S;
-				return JSON.parse(value);
-			} 
-			catch (err) {
-				console.log({err});
+				console.log('before cache get');
+				data = await getDocClient().get(params).promise();
+				console.log('after cache get');
+				console.log(JSON.stringify({getdata:data}));
+			}catch(e) {
+				console.log({cacheGetError:e});
+				return false;
+			}
+			if (!data)
+				return null;
+
+			var now = new Date().getTime();
+			if (data.Item && data.Item.expire && data.Item.expire>0 && data.Item.expire<now){
+				await deleteExistingItem(key);
 				return null;
 			}
+			return data.Item.value;
 		}
 
 		async function clean() {
