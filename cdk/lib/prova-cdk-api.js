@@ -2,6 +2,7 @@ const cdk = require('aws-cdk-lib');
 const apigateway = require("aws-cdk-lib/aws-apigateway");
 //const apigatewayv2 = require("aws-cdk-lib/aws-apigatewayv2");
 const lambda  = require("aws-cdk-lib/aws-lambda");
+//const cdk  = require("aws-cdk-lib/core");
 
 
 class ProvaCdkApiStack extends cdk.Stack {
@@ -30,6 +31,7 @@ class ProvaCdkApiStack extends cdk.Stack {
 			removalPolicy: cdk.RemovalPolicy.DESTROY,
 			runtime: lambda.Runtime.NODEJS_14_X, // So we can use async
 			code: lambdaFolder,
+			timeout: cdk.Duration.seconds(30),
 			handler: `${lambdaFile}.${lambdaFunction}`,
 			environment
 		});

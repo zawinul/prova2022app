@@ -61,7 +61,10 @@ async function loginSetCode(href, token) {
 
 }
 
-async function testS3(credentials) {
+async function testS3(localToken) {
+	let credentials = await utils.getCredentials(localToken,{});
+	let log = [];
+	log.push("cred="+JSON.stringify(credentials));
 	var s3Config = {
 		credentials,
 		region: 'eu-south-1',
@@ -80,14 +83,14 @@ async function testS3(credentials) {
 			var req = s3.putObject(params);
 			req.send();
 			await req.promise();
-			console.log(`put ${name} on ${Bucket} SUCCESS`);
+			log.push(`put ${name} on ${Bucket} SUCCESS`);
 
 		} catch (e) {
-			console.log(`put ${name} on ${Bucket} FAIL: ${e}`);
+			log.push(`put ${name} on ${Bucket} FAIL: ${e}`);
 		}
 	}
 
-	return "ok";
+	return log;
 }
 
 exports.main = async (event, context) => {
@@ -100,80 +103,45 @@ exports.main = async (event, context) => {
 	};
 	if (event.headers && event.headers.origin) {
 		headers["Access-Control-Allow-Origin"] = event.headers.origin;
-		console.log('Access-Control-Allow-Origin = '+event.headers.origin)
+		console.log('Access-Control-Allow-Origin = '+event.headers.origin);
 	}
 	let params = event.queryStringParameters;
 	let body = event.body ? new URLSearchParams(event.body) : null;
 	let method = (''+event.httpMethod).toLowerCase();
-	console.log({method});
+	let auth = event.headers.Authorization;
+	if (auth && (auth.toLowerCase().indexOf('bearer ')==0))
+		auth = auth.substring('bearer '.length);
+
+	console.log({method, auth});
+
+	let fun = function() { return {}; };
 
 	if (method=='get' && params.action == 'login-url') {
-		try {
-			let result = await getLoginUrl(params.provider, params.callback);
-			console.log(JSON.stringify(result));
-			return {
-				statusCode: 200,
-				body: JSON.stringify(result, null, 2),
-				headers,
-			};
-		} catch (err) {
-			console.log(err);
-			console.log(err.stack.split('\n'));
-	
-			return {
-				statusCode: 500,
-				body: JSON.stringify({ err, src: event }, null, 2),
-				headers
-			};
-		}
+		fun = ()=>getLoginUrl(params.provider, params.callback);
+	}
+	else if (method=='get' && params.action == 'test-s3') {
+		fun = ()=>testS3(auth);
 	}
 	else if (method=='post' && body.get('action')=='login-set-code') {
-		try {
-			let result = await loginSetCode(body.get('href'), body.get('token'));
-			console.log(JSON.stringify(result));
-			return {
-				statusCode: 200,
-				body: JSON.stringify(result, null, 2),
-				headers,
-			};
-		} catch (err) {
-			console.log(err);
-			console.log(err.stack.split('\n'));
-	
-			return {
-				statusCode: 500,
-				body: JSON.stringify({ err, src: event }, null, 2),
-				headers
-			};
-		}
-
+		fun = ()=>loginSetCode(body.get('href'), body.get('token'));
 	}
-
-	// da qui in giu' è solo un esempio
-	utils.initLog();
-
-	let statusCode = '200';
 
 	try {
-		var credentials = null;
-		const auth = event.headers.Authorization;
-		if (auth) {
-			if (auth.trim().toLowerCase().indexOf('Bearer ') == 0)
-				auth = auth.substring(7).trim();
-			credentials = await utils.getCredentials();
-			await testS3(credentials);
-		}
-	} catch (e) {
-		console.log(e);
-		console.log(e.stack.split('\n'));
+		let result = await fun();
+		console.log(JSON.stringify(result));
+		return {
+			statusCode: 200,
+			body: JSON.stringify(result, null, 2),
+			headers,
+		};
+	} catch (err) {
+		console.log(err);
+		console.log(err.stack.split('\n'));
+
+		return {
+			statusCode: 500,
+			body: JSON.stringify({ err, src: event }, null, 2),
+			headers
+		};
 	}
-	const log = utils.getLogMessages();
-
-	var ret = {
-		statusCode,
-		body: JSON.stringify({ event, env: process.env, credentials, log }, null, 2),
-		headers
-	};
-	return ret;
-
 };

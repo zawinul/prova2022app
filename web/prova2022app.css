@@ -4,6 +4,7 @@ body {
 button {
   margin: 1px 4px;
 }
+
 .info {
   padding: 20px;
   border: 1px solid #e0e0e0;
@@ -30,4 +31,13 @@ button {
   width: 100%;
   height: 100%;
   background-color: #3f3;
+}
+
+body[logged="yes"] .hide-if-logged {
+	display: none;
+}
+
+
+body[logged="no"] .hide-if-not-logged {
+	display: none;
 }

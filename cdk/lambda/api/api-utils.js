@@ -2,57 +2,19 @@ const AWS = require('aws-sdk');
 var lambda;
 
 const tojson = x=>JSON.stringify(x,null,2);
-function pushlogmsg(x) {
-	
-	if (typeof(x) != 'string') {
-		logmsg.push(x);
-	}
-	try {
-		logmsg.push(JSON.parse(x));
-	}
-	catch(e) {
-		logmsg.push(x);
-	}
-} 
-const logmsg = [];
-
-function initLog() {
-	if (!initLog.native)
-		initLog.native = console.log;
-	
-	console.log = function() {
-		var arr = [];
-		for(var i=0; i<arguments.length; i++) {
-			let x = arguments[i];
-			pushlogmsg(x);
-			x = typeof(x)=='object' ? tojson(x) : x;
-			arr.push(x);
-		}
-		initLog.native.apply(console, arr);
-	};
-}
-
-function getLogMessages() {
-	return logmsg;
-}
 
 
-
-async function getUserInfo(event) {
-}
-
-async function getCredentials(access_token) {
-	console.log({getCredentials:access_token});
+async function getCredentials(localToken, extraInfo) {
+	console.log({getCredentials:localToken});
 
 	if (!lambda)
 		lambda = new AWS.Lambda({ region: process.env.ticketMachineLambdaRegion });
 	
 	var lambdaEvent = {
 		function: 'getRoleCredentials',
-		access_token,
-		source: process.env.ticketMachineLambdaSource,
-		secret: process.env.ticketMachineLambdaSecret,
-		session:'newApiLambdaSession'+Math.random()
+		localToken,
+		session:'newApiLambdaSession'+Math.random(),
+		extraInfo
 	};
 	console.log({lambdaEvent});
 	var params = {
@@ -72,9 +34,6 @@ async function getCredentials(access_token) {
 }
 
 module.exports = {
-	initLog,
-	getLogMessages,
-	getUserInfo,
 	getCredentials,
 	tojson
 }

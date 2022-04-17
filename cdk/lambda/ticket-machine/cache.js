@@ -85,11 +85,15 @@
 				return null;
 
 			var now = new Date().getTime();
-			if (data.Item && data.Item.expire && data.Item.expire>0 && data.Item.expire<now){
-				await deleteExistingItem(key);
-				return null;
+			if (data.Item) {
+				if (data.Item.expire && data.Item.expire>0 && data.Item.expire<now){
+					await deleteExistingItem(key);
+					return null;
+				}
+				return data.Item.value;
 			}
-			return data.Item.value;
+			else
+				return null;
 		}
 
 		async function clean() {

@@ -1,40 +1,18 @@
-// see: https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/CognitoIdentity.html
-// see: https://docs.aws.amazon.com/cognito/latest/developerguide/authorization-endpoint.html
 
-// const CognitoRegion = 'us-east-1';
-// const UserPoolId = 'us-east-1_SgNY6TTJQ';
-// const ClientId = '3u600gkmd1kp54tc454a0c441m';
-// const CognitoDomain = 'https://prova2022b.auth.us-east-1.amazoncognito.com';
 
 const APIId = 'kb2bc38pp7';
 const APIRegion = 'eu-south-1';
 const APIStage = 'prod';
 const APIUrl = `https://${APIId}.execute-api.${APIRegion}.amazonaws.com/${APIStage}`;
 
+let logged=false;
 let curAuthenticator;
 let curTmToken;
-const oidcProvider = {
-	cognito: {
-		base: 'https://cognito-idp.us-east-1.amazonaws.com/us-east-1_SgNY6TTJQ',
-		scope: 'aws.cognito.signin.user.admin email openid phone profile',
-		clientId: '3u600gkmd1kp54tc454a0c441m'
-	},
-	google: {
-		// https://console.cloud.google.com/apis/credentials?project=api-project-181501718002
-		base: 'https://accounts.google.com/',
-		scope: "openid email profile",
-		clientId: '181501718002-t1f3557f4k5aiaa85fplvs2v43kbkgl5.apps.googleusercontent.com',
-		clientSecret: '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'
-	}
-}
+let curUser;
 
-var id_token, access_token, refresh_token, expires_in;
+
 var loginCallBack = location.origin + location.pathname + 'auth-callback.html';
-var logoutCallBack = location.origin + location.pathname + 'logout-callback.html';
 
-var loginState, loginNonce;
-var authenticationPromise
-let codeVerifier;
 
 var utils = {
 
@@ -47,80 +25,16 @@ var utils = {
 		$('<pre/>').addClass('utils.preinfo').text(x).appendTo('.info');
 	},
 
-	createButton: function (fun, descr) {
+	createButton: function (fun, class_, descr) {
 		function onclick() {
 			$('.info').empty();
 			fun();
 		}
-		var b = $('<button/>').text(descr);
+		var b = $('<button/>').addClass(class_).text(descr);
 		$('.buttons').append(b);
 		b.click(onclick);
-	},
-
-	parseToken: function (x) {
-		if (!x.split)
-			return x;
-		var s = x.split('.');
-		if (s.length != 3)
-			return x;
-		var j = atob(s[1]);
-		return atob(s[0]) + '\n'
-			+ JSON.stringify(JSON.parse(j), null, 2) + '\n' +
-			s[2];
-	},
-
-	parseTokenData: function (str) {
-
-		if (str.indexOf('?') >= 0)
-			str = str.split('?')[1];
-
-		if (str.indexOf('#') >= 0)
-			str = str.split('#')[1];
-
-		var info = [];
-		var pars = str.split('&');
-		var obj = {};
-		for (var i = 0; i < pars.length; i++) {
-			let x = pars[i];
-			var k = x.split('=')[0];
-			var v = x.split('=')[1];
-			obj[k] = v;
-			v = utils.parseToken(v);
-			info.push(`--PARAM[${k}] = ${v}`);
-		}
-		id_token = obj.id_token;
-		access_token = obj.access_token;
-		refresh_token = obj.refresh_token;
-		expires_in = obj.expires_in;
-		setExpirationLimit(new Date().getTime() + expires_in * 1000);
-
-		$('.autenticato').show();
-
-		console.log({ obj });
-		info = info.join('\n');
-		utils.preinfo(info);
-
-	},
-	generateRandomString: function (length) {
-		var text = "";
-		var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-		for (var i = 0; i < length; i++) {
-			text += possible.charAt(Math.floor(Math.random() * possible.length));
-		}
-
-		return text;
-	},
-	generateCodeChallenge: async function (codeVerifier) {
-		var digest = await crypto.subtle.digest("SHA-256",
-			new TextEncoder().encode(codeVerifier));
-
-		return btoa(String.fromCharCode(...new Uint8Array(digest)))
-			.replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_')
+		return b;
 	}
-
-
-
 }
 
 var refreshTimer;
@@ -158,7 +72,10 @@ async function onAuthCallback(href) {
 	});
 	let response = await request;
 	console.log(response);
-	utils.preinfo(JSON.stringify(response,null,2));
+	logged = true;
+	$('body').attr('logged','yes');
+	curUser = response.body;
+	utils.preinfo(JSON.stringify(curUser,null,2));
 }
 
 function onMessage(event) {
@@ -168,9 +85,8 @@ function onMessage(event) {
 		utils.loginfo("logged out!");
 		if (refreshTimer)
 			clearTimeout(refreshTimer);
-		$('.autenticato').hide();
 		$('.exp-bar-inner').stop(true);
-		$('.exp-bar-outer').hide();
+		$('body').attr('logged','no');
 	}
 
 	//utils.preinfo(event);
@@ -225,11 +141,11 @@ function command_callLambda() {
 		xhrFields: {
 			withCredentials: true
 		},
-		data:{x:3,y:'abc'}
+		data:{x:3,y:'abc',action:'test-s3'}
 	};
 
-	if (access_token)
-		conf.headers.Authorization = access_token;
+	if (curTmToken)
+		conf.headers.Authorization = 'Bearer access_token';
 
 	utils.preinfo(JSON.stringify(conf, null, 2));
 	$.ajax(conf).then(function (data) {
@@ -271,13 +187,12 @@ async function newLogin(provider) {
 	setTimeout(()=>a.remove(),1);
 }
 function init() {
-	utils.createButton(() => newLogin('cognito'), 'login cognito');
-	utils.createButton(() => newLogin('google'), 'login google');
-	utils.createButton(command_logout, 'logout');
-
-	utils.createButton(command_callLambda, 'call Lambda');
-	utils.createButton(command_callFreeLambda, 'call free Lambda');
-	utils.createButton(command_logout, 'logout');
+	utils.createButton(() => newLogin('cognito'), 'hide-if-logged', 'login cognito');
+	utils.createButton(() => newLogin('google'), 'hide-if-logged', 'login google');
+	
+	utils.createButton(command_callLambda, 'hide-if-not-logged', 'call Lambda');
+	utils.createButton(command_callFreeLambda, 'hide-if-not-logged', 'call free Lambda');
+	utils.createButton(command_logout, 'hide-if-not-logged', 'logout');
 
 	window.addEventListener("message", onMessage, false);
 };

@@ -2,7 +2,7 @@ const cdk = require('aws-cdk-lib');
 const iam = require("aws-cdk-lib/aws-iam");
 const lambda = require("aws-cdk-lib/aws-lambda");
 const db = require("aws-cdk-lib/aws-dynamodb");
-//const AWS = require("aws-sdk");
+//const cdk  = require("aws-cdk-lib/core");
 
 class ProvaCdkTicketMachineStack extends cdk.Stack {
 
@@ -37,6 +37,7 @@ class ProvaCdkTicketMachineStack extends cdk.Stack {
 			code: lambdaFolder,
 			handler: `${lambdaFile}.${lambdaFunction}`,
 			removalPolicy: cdk.RemovalPolicy.DESTROY,
+			timeout: cdk.Duration.seconds(30),
 			environment: {
 				roles:JSON.stringify(roles),
 				// addInfoToReply:'1',

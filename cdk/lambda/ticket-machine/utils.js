@@ -1,7 +1,7 @@
 const https = require('https');
 const crypto = require('crypto');
 const querystring = require('querystring');
- const jose = require('jose');
+const jose = require('jose');
  
 const tojson = x=>JSON.stringify(x,null,2);
 
@@ -59,24 +59,6 @@ function btoa(x) {
 function atob(x) {
 	return Buffer.from(x, 'base64').toString();
 }
-var logmsg = [];
-function setupLogObj() {
-	var l = console.log;
-	console.log = function() {
-		var arr = [];
-		for(var i=0; i<arguments.length; i++) {
-			let x = arguments[i];
-			x = typeof(x)=='object' ? tojson(x) : x
-			arr.push(x);
-		}
-		l.apply(console, arr);
-		logmsg.push(arr.join(', '));
-	};
-}
-
-function getLogMessages() {
-	return logmsg;
-}
 
 function generateRandomString(length) {
 	var text = "";
@@ -90,10 +72,6 @@ function generateRandomString(length) {
 }
 
 async function generateCodeChallenge(codeVerifier) {
-	// const ec = new TextEncoder();
-	// const encoded = ec.encode(codeVerifier);
-	// const digest = await subtle.digest('SHA-256', encoded);
-	//return btoa(String.fromCharCode(...new Uint8Array(digest)))
 	const hash = crypto.createHash('sha256').update(codeVerifier).digest('base64')
 	.replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_')
 
@@ -107,8 +85,6 @@ module.exports = {
 	atob,
 	btoa,
 	now,
-	setupLogObj,
-	getLogMessages,
 	generateRandomString,
 	generateCodeChallenge
-}
+};
