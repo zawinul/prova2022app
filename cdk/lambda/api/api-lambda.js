@@ -2,67 +2,58 @@
 const utils = require('./api-utils');
 const AWS = require('aws-sdk');
 
-async function getLoginUrl(provider, callback) {
-	try {
-		console.log('getLoginUrl ' + provider + ',' + callback);
-		let lambda = new AWS.Lambda({ region: process.env.ticketMachineLambdaRegion });
+let _tmlambda;
 
-		var lambdaEvent = {
-			function: 'getLoginParameters',
-			provider,
-			callback
-		};
+let commands={}
 
+commands.loginUrl = async function(event) {
+	let origin = (event.headers && event.headers.origin) ? event.headers.origin : '*';
+	let params = event.queryStringParameters;
+	let provider = params.provider;
+	let headers = getOuputHeaders(event);
 
-		var params = {
-			FunctionName: process.env.ticketMachineLambdaName,
-			Payload: JSON.stringify(lambdaEvent),
-		};
+	let data = await callTmLambda({
+		function: 'getLoginParameters',
+		provider,
+		origin
+	});
 
-		var lambdaResult = await lambda.invoke(params).promise();
-		var data = JSON.parse(lambdaResult.Payload);
-		console.log('lambdaResult: ' + JSON.stringify(lambdaResult));
-		return data;
-
-	} catch (err) {
-		console.log(err);
-		console.log(err.stack.split('\n'));
-		return { err }
-	}
+	return {
+		statusCode: 200,
+		body: JSON.stringify(data,null,2),
+		headers
+	};
 }
 
-async function loginSetCode(href, token) {
-	try {
-		console.log('loginSetCode ' + token + ',' + href);
-		let lambda = new AWS.Lambda({ region: process.env.ticketMachineLambdaRegion });
 
-		var lambdaEvent = {
-			function: 'login-set-code',
-			token,
-			href
-		};
+commands.loginCallbackPage = async function(event) {
+	let code = event.queryStringParameters.code;
+	let state = event.queryStringParameters.state;
+	let headers = getOuputHeaders(event);
+	headers['Content-Type'] = 'text/html; charset=UTF-8';
 
+	let data = await callTmLambda({
+		function: 'getLoginCallbackPage',
+		code,
+		state
+	});
 
-		var params = {
-			FunctionName: process.env.ticketMachineLambdaName,
-			Payload: JSON.stringify(lambdaEvent),
-		};
-
-		var lambdaResult = await lambda.invoke(params).promise();
-		var data = JSON.parse(lambdaResult.Payload);
-		console.log('lambdaResult: ' + JSON.stringify(lambdaResult));
-		return data;
-
-	} catch (err) {
-		console.log(err);
-		console.log(err.stack.split('\n'));
-		return { err }
-	}
-
+	var page = data.body;
+	console.log('page: ' + page);
+	return {
+		statusCode: 200,
+		body: page,
+		headers
+	};
 }
 
-async function testS3(localToken) {
-	let credentials = await utils.getCredentials(localToken,{});
+
+commands.testS3 = async function(event) {
+	let auth = getAuth(event);
+	console.log('auth='+auth);
+	let headers = getOuputHeaders(event);
+
+	let credentials = await utils.getCredentials(auth,{});
 	let log = [];
 	log.push("cred="+JSON.stringify(credentials));
 	var s3Config = {
@@ -89,12 +80,61 @@ async function testS3(localToken) {
 			log.push(`put ${name} on ${Bucket} FAIL: ${e}`);
 		}
 	}
-
-	return log;
+	return {
+		statusCode: 200,
+		body: JSON.stringify(log,null,2),
+		headers
+	};
 }
 
 exports.main = async (event, context) => {
-	console.log(JSON.stringify(event,null,2));
+	logevent(event);
+	let params = event.queryStringParameters;
+	let method = (''+event.httpMethod).toLowerCase();
+	let command;
+	if (method=='get' && event.path == '/login-cb-page') 
+		command = 'loginCallbackPage';
+	else if (method=='get' && params.action == 'login-url') 
+		command = 'loginUrl';
+	else if (method=='get' && params.action == 'test-s3') 
+		command = 'testS3';
+ 
+	console.log('command='+command);
+	if (!command)
+		return { statusCode: 500, body: 'unknown command', headers:getOuputHeaders(event) };
+
+	try {
+		let out = commands[command](event);
+		return out;
+	}
+	catch(e) {
+		console.log(e);
+		if (e.stack)
+			console.log(e.stack.split('\n'));
+		return { statusCode: 500, body: e, headers:getOuputHeaders(event) };
+	}
+};
+
+async function callTmLambda(cmd) {
+	if (!_tmlambda)
+		_tmlambda = new AWS.Lambda({ region: process.env.ticketMachineLambdaRegion });
+
+	var params = {
+		// DA CAMBIARE!!!
+		FunctionName: process.env.ticketMachineLambdaName,
+		Payload: JSON.stringify(cmd),
+	};
+	var lambdaResult = await _tmlambda.invoke(params).promise();
+	var data = lambdaResult.Payload;
+	try {
+		data = JSON.parse(lambdaResult.Payload);
+	}catch(e) {}
+	
+	console.log('lambdaResult: ' + JSON.stringify(lambdaResult));
+	return data
+}
+
+function getOuputHeaders(event) {
 	let headers = {
 		'Access-Control-Allow-Methods': 'OPTIONS,POST,GET',
 		'Access-Control-Allow-Headers': 'Content-Type, Origin, Access-Control-Request-Method, Access-Control-Allow-Origin,Authorization',
@@ -105,43 +145,21 @@ exports.main = async (event, context) => {
 		headers["Access-Control-Allow-Origin"] = event.headers.origin;
 		console.log('Access-Control-Allow-Origin = '+event.headers.origin);
 	}
-	let params = event.queryStringParameters;
-	let body = event.body ? new URLSearchParams(event.body) : null;
-	let method = (''+event.httpMethod).toLowerCase();
+	return headers;
+}
+
+function getAuth(event) {
 	let auth = event.headers.Authorization;
 	if (auth && (auth.toLowerCase().indexOf('bearer ')==0))
 		auth = auth.substring('bearer '.length);
+	return auth;
+}
 
-	console.log({method, auth});
-
-	let fun = function() { return {}; };
-
-	if (method=='get' && params.action == 'login-url') {
-		fun = ()=>getLoginUrl(params.provider, params.callback);
-	}
-	else if (method=='get' && params.action == 'test-s3') {
-		fun = ()=>testS3(auth);
-	}
-	else if (method=='post' && body.get('action')=='login-set-code') {
-		fun = ()=>loginSetCode(body.get('href'), body.get('token'));
-	}
-
-	try {
-		let result = await fun();
-		console.log(JSON.stringify(result));
-		return {
-			statusCode: 200,
-			body: JSON.stringify(result, null, 2),
-			headers,
-		};
-	} catch (err) {
-		console.log(err);
-		console.log(err.stack.split('\n'));
-
-		return {
-			statusCode: 500,
-			body: JSON.stringify({ err, src: event }, null, 2),
-			headers
-		};
-	}
-};
+function logevent(event) {
+	let clone = JSON.parse(JSON.stringify(event));
+	delete clone.multiValueHeaders;
+	delete clone.requestContext;
+	delete clone.multiValueQueryStringParameters;
+	// remove something
+	console.log(JSON.stringify(clone,null,2));
+}

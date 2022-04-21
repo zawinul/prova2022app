@@ -18,22 +18,12 @@ class ProvaCdkTicketMachineStack extends cdk.Stack {
 			removalPolicy: cdk.RemovalPolicy.DESTROY
 		});
 
-		const roleName = (tenantName) => prefix+"-tm-role-" + tenantName;
-		const roleArn  = tenantName=>`arn:aws:iam::${props.env.account}:role/${roleName(tenantName)}`;
-
-		var map = props.tenants;
-		const roles = [];
-		for (var tenantName in map)
-			roles.push(roleArn(tenantName));
-
 	
-		const lambdaFolder = lambda.Code.fromAsset("lambda/ticket-machine");
-		const lambdaFile = "ticket-machine-lambda";
+		const lambdaFolder = lambda.Code.fromAsset("lambda/cache");
+		const lambdaFile = "cache-lambda";
 		const lambdaFunction = "main";
-		const functionName = this.lambdaName = prefix+"-ticket-machine-handler";
-		let importedApiURL = '';
-		//importedApiURL = cdk.Fn.importValue('mainApiURL');
-    
+		const functionName = this.lambdaName = prefix+"-cache-handler";
+		
 		this.lambda = new lambda.Function(this, functionName, {
 			functionName,
 			runtime: lambda.Runtime.NODEJS_14_X, // So we can use async
@@ -42,7 +32,6 @@ class ProvaCdkTicketMachineStack extends cdk.Stack {
 			removalPolicy: cdk.RemovalPolicy.DESTROY,
 			timeout: cdk.Duration.seconds(30),
 			environment: {
-				apiURL: importedApiURL.toString(),
 				cacheTableName,
 				account:props.env.account,
 				region:props.env.region
@@ -51,17 +40,6 @@ class ProvaCdkTicketMachineStack extends cdk.Stack {
 
 		cacheTable.grantReadWriteData(this.lambda.grantPrincipal);
 
-		//console.log(JSON.stringify(map));
-		for (var tenantName in map) {
-			let  { 	accessPolicy, bucket } = map[tenantName];
-
-			let role = new iam.Role(this, roleName(tenantName), {
-				assumedBy: this.lambda.grantPrincipal,
-				removalPolicy: cdk.RemovalPolicy.DESTROY,
-				roleName: roleName(tenantName),
-				managedPolicies: [ accessPolicy ]	
-			});
-		}
 	}
 }
 

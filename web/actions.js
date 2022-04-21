@@ -59,22 +59,10 @@ function setExpirationLimit(ts) {
 	utils.loginfo("new expiration date " + new Date(ts));
 }
 
-async function onAuthCallback(href) {
-	console.log('onAuthCallback ' + href);
-	let request = $.ajax({
-		method:'post',
-		url: `${APIUrl}/prova2022lambda?f=${Math.random()}`,
-		data: {
-			action:'login-set-code',
-			href:href,
-			token: curTmToken
-		}
-	});
-	let response = await request;
-	console.log(response);
-	logged = true;
+async function onAuthCallback(sid, user, expire) {
+	console.log('onAuthCallback ');
 	$('body').attr('logged','yes');
-	curUser = response.body;
+	curUser = user;
 	utils.preinfo(JSON.stringify(curUser,null,2));
 }
 
@@ -94,7 +82,7 @@ function onMessage(event) {
 	utils.preinfo(JSON.stringify({evdata}));
 
 	if (evdata.type == "authCallback") {
-		onAuthCallback(evdata.href);
+		onAuthCallback(evdata.sid, evdata.user, evdata.expire);
 	}
 	else if (evdata.type == "logoutCallback")
 		onLogoutCallback();
@@ -174,7 +162,7 @@ async function newLogin(provider) {
 		data: {
 			action:'login-url',
 			provider,
-			callback:location.origin+location.pathname+'auth-callback.html'
+			//callback:location.origin+location.pathname+'auth-callback.html'
 		}
 	});
 	let data = await request;

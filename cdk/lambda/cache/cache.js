@@ -138,7 +138,7 @@ function init() {
 	}
 
 	async function reset() {
-
+		return true;
 	}
 
 	async function changeExpiration(key, timestamp) {

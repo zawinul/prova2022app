@@ -16,6 +16,10 @@ function buildApp() {
 	const tenants = new ProvaCdkTenantsStack(app, config.namePrefix+'-TENANTS', tenantProps);
 	
 	const tmSecret = "secret-8Y6UG45F6TC4H";
+	const tmLambdaName = config.namePrefix+'-ticket-machine-handler';
+	const cacheLambdaName = config.namePrefix+'-cache-handler';
+	
+
 	const ticketMachineProps = Object.assign({}, config, {
 		tenants: tenants.map,
 		secret: tmSecret
@@ -27,10 +31,6 @@ function buildApp() {
 		ticketMachineProps);
 	
 	const apiProps = Object.assign({}, config, {
-		ticketMachineLambdaName: ticketMachine.lambdaName,
-		ticketMachineLambdaRegion: config.env.region,
-		ticketMachineLambdaSource: 'api-lambda',
-		ticketMachineLambdaSecret: tmSecret
 	});
 	//console.log({ apiProps });
 	const api = new ProvaCdkApiStack(app, config.namePrefix+'-API', apiProps);

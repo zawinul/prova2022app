@@ -28,100 +28,6 @@ const oidcProvider = {
 	}
 };
 
-async function loginSetCode(id, href) {
-	console.log(`loginSetCode(${id}, ${href})`)
-	let cacheKey = 'auth-state-'+id;
-	console.log('cacheKey = '+cacheKey);
-	let cacheElement = await cache.get(cacheKey);
-	console.log(JSON.stringify({cacheElement},null,2))
-	if (!cacheElement)
-		throw "invalid session";
-
-	let  {
-		state,
-		provider,
-		callback,
-		codeVerifier
-	} = cacheElement;
-
-	let u = new URL(href);
-	let ustate = u.searchParams.get('state');
-	let code = u.searchParams.get('code');
-	console.log('state='+state);
-	console.log('code='+code);
-	if (ustate!=state)
-		throw "wrong state";
-
-	let desc = oidcProvider[provider];
-	if (!desc)
-		throw "Unknown provider";
-
-	let providerInfo = await getProviderInfo(provider);
-	let endpoint = providerInfo.token_endpoint;
-	var params = {
-		grant_type: 'authorization_code',
-		client_id: desc.clientId,
-		code,
-		code_verifier: codeVerifier,
-		redirect_uri: callback // non penso che serva
-	};
-	if (desc.clientSecret)
-		params.client_secret = desc.clientSecret;
-
-	console.log({params});
-	let req = utils.doHttpsRequest(endpoint,{method:'POST'}, params);
-	let resp = await(req);
-	resp = JSON.parse(resp);
-	console.log(JSON.stringify(resp,null,2));
-	cacheElement.expire = (new Date()).getTime()+resp.expires_in*1000;
-	console.log('scadenza: '+new Date(cacheElement.expire));
-	cacheElement.id_token = resp.id_token;
-	cacheElement.access_token = resp.access_token;
-	console.log('access_token='+cacheElement.access_token);
-
-	cache.set(cacheKey, cacheElement, cacheElement.expire);
-	// attenzione: non e' detto che debba scadere. Da ripensare
-
-	// verifica del token
-	let verified = false;
-	for(let i=0; i<providerInfo.cert.keys.length;i++) {
-		let k = providerInfo.cert.keys[i];
-		console.log(i+': k='+JSON.stringify(k));
-		let jk =  await jose.importJWK(k);
-		console.log(i+': jk='+JSON.stringify(jk));
-		try {
-			console.log('before verify '+i);
-			let data = await jose.jwtVerify(cacheElement.id_token,jk);
-			console.log('after verify '+i);
-			console.log(JSON.stringify({verified:data},null,2));
-			verified = true;
-		} catch(e) {
-			console.log("err i="+i+": "+e);
-		}
-	}
-	if (!verified)
-		throw "invalid access_token";
-
-	let url = providerInfo.userinfo_endpoint;
-	let inforeq = utils.doHttpsRequest(url, {
-		method: 'GET',
-		dataType: "jsonp",
-		headers: {
-			Authorization: 'Bearer ' + cacheElement.access_token
-		}
-	});
-	let userinfo = await inforeq;
-	userinfo = JSON.parse(userinfo);
-	console.log(userinfo);
-
-	cacheElement.userinfo = userinfo;
-	cache.set(cacheKey, cacheElement,)
-	return {
-		userinfo,
-		expire: cacheElement.expire
-	};
-
-}
 
 async function getProviderInfo(provider) {
 	let desc = oidcProvider[provider];
@@ -149,11 +55,13 @@ async function getProviderInfo(provider) {
 	return providerInfo;
 }
 
-async function getLoginParameters(provider,callback) {
+async function getLoginParameters(provider, origin) {
 	console.log('getLoginParameters-2');
+	const apiURL=process.env.apiURL;
+	console.log('apiURL='+apiURL);
+
 	let desc = oidcProvider[provider];
 	let providerInfo = await getProviderInfo(provider);
-
 	
 	let codeVerifier = utils.generateRandomString(100);
 	let id = utils.generateRandomString(20);
@@ -161,10 +69,11 @@ async function getLoginParameters(provider,callback) {
 	console.log({ codeVerifier, challenge });
 
 	let stateObj = {
-		seed: utils.generateRandomString(100),
-		provider
+		origin,
+		id
 	};
 	let state = utils.btoa(JSON.stringify(stateObj));
+	let callback=apiURL+'login-cb-page';
 	let params = {
 		state,
 		client_id: desc.clientId,
@@ -211,7 +120,7 @@ async function getCredentials(localToken, sessionName, extraInfo) {
 		RoleSessionName: sessionName,
 		DurationSeconds: 900
 	};
-	var sts = await getSTS();
+	var sts = await _getSTS();
 	var assumeRoleData = await sts.assumeRole(params).promise();
 	
 	return {
@@ -222,8 +131,106 @@ async function getCredentials(localToken, sessionName, extraInfo) {
 	};
 }
 
+async function getLoginCallbackPage(code, state) {
+	let obj = JSON.parse(utils.atob(state));
+	let { origin, id} = obj;
+	let cacheKey = 'auth-state-'+id;
+	console.log('cacheKey = '+cacheKey);
+	let cacheElement = await cache.get(cacheKey);
+	console.log(JSON.stringify({cacheElement},null,2))
+	if (!cacheElement)
+		throw "invalid session";
+	let  {
+		//state,
+		provider,
+		callback,
+		codeVerifier
+	} = cacheElement;
 
-async function getSTS() {
+	let desc = oidcProvider[provider];
+	if (!desc)
+		throw "Unknown provider";
+
+	let providerInfo = await getProviderInfo(provider);
+	let endpoint = providerInfo.token_endpoint;
+	var params = {
+		grant_type: 'authorization_code',
+		client_id: desc.clientId,
+		code,
+		code_verifier: codeVerifier,
+		redirect_uri: callback // non penso che serva
+	};
+	if (desc.clientSecret)
+		params.client_secret = desc.clientSecret;
+	
+	console.log({params});
+	let req = utils.doHttpsRequest(endpoint,{method:'POST'}, params);
+	let resp = await(req);
+	resp = JSON.parse(resp);
+	console.log(JSON.stringify(resp,null,2));
+		
+	cacheElement.expire = (new Date()).getTime()+resp.expires_in*1000;
+	console.log('scadenza: '+new Date(cacheElement.expire));
+	cacheElement.id_token = resp.id_token;
+	cacheElement.access_token = resp.access_token;
+	console.log('access_token='+cacheElement.access_token);
+
+	cache.set(cacheKey, cacheElement, cacheElement.expire);
+	// attenzione: non e' detto che debba scadere. Da ripensare
+
+	// verifica del token
+	let verified = false;
+	for(let i=0; i<providerInfo.cert.keys.length;i++) {
+		let k = providerInfo.cert.keys[i];
+		console.log(i+': k='+JSON.stringify(k));
+		let jk =  await jose.importJWK(k);
+		console.log(i+': jk='+JSON.stringify(jk));
+		try {
+			console.log('before verify '+i);
+			let data = await jose.jwtVerify(cacheElement.id_token,jk);
+			console.log('after verify '+i);
+			console.log(JSON.stringify({verified:data},null,2));
+			verified = true;
+		} catch(e) {
+			console.log("err i="+i+": "+e);
+		}
+	}
+	if (!verified)
+		throw "invalid access_token";
+
+
+	let url = providerInfo.userinfo_endpoint;
+	let inforeq = utils.doHttpsRequest(url, {
+		method: 'GET',
+		dataType: "jsonp",
+		headers: {
+			Authorization: 'Bearer ' + cacheElement.access_token
+		}
+	});
+	let userinfo = await inforeq;
+	userinfo = JSON.parse(userinfo);
+	console.log(userinfo);
+	cacheElement.userinfo = userinfo;
+	cache.set(cacheKey, cacheElement,)
+		
+	return `<!DOCTYPE html>
+		<html>
+		<body>wait...</body>
+		<script>
+			var obj = {
+				type: 'authCallback',
+				sid: '${id}',
+				user: ${JSON.stringify(userinfo,null,2)},
+				expire: ${cacheElement.expire}
+			};
+			if (window.opener)
+				window.opener.postMessage(JSON.stringify(obj), "${origin}");
+			setTimeout(()=>window.close(), 1);
+		</script>
+		</html>`;
+}
+
+async function _getSTS() {
 	
 
 	const sts = new AWS.STS({
@@ -234,19 +241,27 @@ async function getSTS() {
 	return sts;
 }
 
-async function getOIDCConfig(issuer) {
-	var configUrl = issuer + '/.well-known/openid-configuration';
-	var response = await utils.doHttpsRequest(configUrl, {});
-	var config = JSON.parse(response);
-	return config;
+
+async function sessionRefresh(id) {
+
 }
 
+async function sessionSet(id, key, value) {
+	// return previous value
+} 
+
+async function sessionGet(id, key) {
+
+} 
 
 
 module.exports = {
 	getCredentials,
-	getOIDCConfig,
+	//getOIDCConfig,
 	getLoginParameters,
-	loginSetCode
-		
+	//loginSetCode,
+	getLoginCallbackPage,
+	sessionRefresh,
+	sessionSet,
+	sessionGet
 }

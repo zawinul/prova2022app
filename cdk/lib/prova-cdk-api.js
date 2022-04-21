@@ -18,10 +18,6 @@ class ProvaCdkApiStack extends cdk.Stack {
 		const environment = {
 			account:props.env.account,
 			region:props.env.region,
-			ticketMachineLambdaName:props.ticketMachineLambdaName,
-			ticketMachineLambdaRegion:props.ticketMachineLambdaRegion,
-			ticketMachineLambdaSource: props.ticketMachineLambdaSource,
-			ticketMachineLambdaSecret: props.ticketMachineLambdaSecret,
 			buckets: JSON.stringify(bucketNames)
 		};
 		//console.log(JSON.stringify({environment, props}, null, 2));
@@ -46,16 +42,21 @@ class ProvaCdkApiStack extends cdk.Stack {
 			restApiName:apiName+'2',
 			deploy: true,		
 			defaultIntegration: lambdaIntegration,
-
 		});
 
 		const defz = api.root.addResource('{proxy+}');
 		defz.addMethod('ANY');
 
-		new cdk.CfnOutput(this, 'output1', {
+		new cdk.CfnOutput(this, 'api-url-old', {
+			removalPolicy: cdk.RemovalPolicy.RETAIN,
+
 			value: `https://${api.restApiId}.execute-api.${this.region}.amazonaws.com/`,
-			description:'aeiou',
-			exportName: 'bbbdddccc'
+		});
+
+		new cdk.CfnOutput(this, 'api-url', {
+			removalPolicy: cdk.RemovalPolicy.RETAIN,
+			value: api.url,
+			exportName: 'mainApiURL'
 		});
 
 		this.lambda = apiLambda;
