@@ -8,6 +8,7 @@ let logged=false;
 let curAuthenticator;
 let curUser;
 let sessionId;
+const loginMode = 'frame';
 
 var loginCallBack = location.origin + location.pathname + 'auth-callback.html';
 
@@ -186,9 +187,14 @@ async function newLogin(provider) {
 	let loginUrl = data.url;
 	sessionId = data.id;
 	utils.loginfo(loginUrl);
-	var a = $(`<a target="tmp_login">jump</a>`).attr('href',loginUrl).appendTo('body');
-	a[0].click();
-	setTimeout(()=>a.remove(),1);
+	if (loginMode=='frame') {
+		var a = $(`<iframe id='loginIframe' src='${loginUrl}'></iframe>`).appendTo('body');
+	}
+	else {
+		var a = $(`<a target="tmp_login">jump</a>`).attr('href',loginUrl).appendTo('body');
+		a[0].click();
+		setTimeout(()=>a.remove(),1);
+	}
 }
 function init() {
 	utils.createButton(() => newLogin('cognito'), 'hide-if-logged', 'login cognito');

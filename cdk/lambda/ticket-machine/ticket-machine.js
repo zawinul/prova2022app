@@ -244,9 +244,12 @@ async function getLoginCallbackPage(code, state) {
 					user: ${JSON.stringify(userinfo,null,2)},
 					expire: ${cacheElement.expire}
 				};
-				if (window.opener)
+				if (window.opener) {
 					window.opener.postMessage(JSON.stringify(obj), "${origin}");
-				setTimeout(()=>window.close(), 1);
+					setTimeout(()=>window.close(), 1);
+				}
+				if (window.parent && !(window===window.parent))
+					window.parent.postMessage(JSON.stringify(obj), "${origin}");
 			</script>
 			</html>`;
 	}
