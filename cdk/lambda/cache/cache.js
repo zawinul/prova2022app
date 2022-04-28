@@ -65,6 +65,13 @@ function init() {
 		}
 	}
 
+	async function _delete(key) {
+		console.log('delete '+key);
+		let ok = await _deleteExistingItem(key);
+		console.log('delete ok = '+ok);
+		return ok;
+	}
+
 	async function get(key) {
 		var params = {
 			TableName: TABLENAME,
@@ -76,24 +83,20 @@ function init() {
 			console.log('before cache get');
 			data = await _getDocClient().get(params).promise();
 			console.log('after cache get');
-			console.log(JSON.stringify({ getdata: data }));
+			console.log(JSON.stringify({ getdata: data, asBoolean:!!data }));
 		} catch (e) {
 			console.log({ cacheGetError: e });
 			return false;
 		}
-		if (!data)
+		if (!data || !data.Item)
 			return null;
 
 		var now = new Date().getTime();
-		if (data.Item) {
-			if (data.Item.expire && data.Item.expire > 0 && data.Item.expire < now) {
-				await _deleteExistingItem(key);
-				return null;
-			}
-			return data.Item.value;
-		}
-		else
+		if (data.Item.expire && data.Item.expire > 0 && data.Item.expire < now) {
+			await _deleteExistingItem(key);
 			return null;
+		}
+		return data.Item.value;
 	}
 
 	async function clean() {
@@ -183,7 +186,12 @@ function init() {
 	}
 
 	return {
-		get, set, clean, reset, changeExpiration
+		get, 
+		set, 
+		clean, 
+		reset, 
+		changeExpiration, 
+		delete: _delete
 	}
 }
 

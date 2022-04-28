@@ -7,58 +7,64 @@ const ProvaCdkApiStack = require('../lib/prova-cdk-api');
 const ProvaEc2MachineStack = require('../lib/prova-cdk-ec2');
 const ProvaVpcStack = require('../lib/prova-cdk-vpc');
 const ProvaCdkStaticwebStack = require('../lib/prova-cdk-staticweb');
+const ProvaCdkCache = require('../lib/prova-cdk-cache');
 const config = require('../config.js');
 const app = new cdk.App();
-
+let stacks={};
 
 function buildApp() {
+	
+	config.cacheLambdaName = config.namePrefix+'-cache-handler';
+	config.ticketMachineLambdaName = config.namePrefix+'-ticket-machine-handler';
+
+	const apiProps = Object.assign({}, config, {
+	});
+	//console.log({ apiProps });
+	stacks.api = new ProvaCdkApiStack(app, config.namePrefix+'-API', apiProps);
+
+
+
+	const cacheProps = Object.assign({}, config);
+	stacks.cache = new ProvaCdkCache(app, config.namePrefix+'-CACHE', cacheProps);
+	
 	const tenantProps = Object.assign({}, config);
-	const tenants = new ProvaCdkTenantsStack(app, config.namePrefix+'-TENANTS', tenantProps);
-	
-	const tmSecret = "secret-8Y6UG45F6TC4H";
-	const tmLambdaName = config.namePrefix+'-ticket-machine-handler';
-	const cacheLambdaName = config.namePrefix+'-cache-handler';
-	
+	stacks.tenants = new ProvaCdkTenantsStack(app, config.namePrefix+'-TENANTS', tenantProps);
 
 	const ticketMachineProps = Object.assign({}, config, {
-		tenants: tenants.map,
-		secret: tmSecret
+		tenants: stacks.tenants.map,
+		useCachePolicy: stacks.cache.canInvoke,
+		api: stacks.api.api
 	});
 
-	const ticketMachine = new ProvaCdkTicketMachineStack (
+	stacks.ticketMachine = new ProvaCdkTicketMachineStack (
 		app, 
 		config.namePrefix+'-TICKET-MACHINE',
 		ticketMachineProps);
 	
-	const apiProps = Object.assign({}, config, {
-	});
-	//console.log({ apiProps });
-	const api = new ProvaCdkApiStack(app, config.namePrefix+'-API', apiProps);
+	// ticketMachine.lambda.grantInvoke(api.lambda);
 
-	ticketMachine.lambda.grantInvoke(api.lambda);
-
-	if (config.includeStaticWeb) {
-		const webProps = Object.assign({}, config, {
-		});
-		const staticweb = new ProvaCdkStaticwebStack(app, config.namePrefix+'-STATICWEB', webProps);
-	}
+	// if (config.includeStaticWeb) {
+	// 	const webProps = Object.assign({}, config, {
+	// 	});
+	// 	const staticweb = new ProvaCdkStaticwebStack(app, config.namePrefix+'-STATICWEB', webProps);
+	// }
 	
-	if (config.includeVPC) {
-		const vpcProps = Object.assign({}, config, {
-		});
+	// if (config.includeVPC) {
+	// 	const vpcProps = Object.assign({}, config, {
+	// 	});
 
 
-		const vpc = new ProvaVpcStack(app, config.namePrefix+'-VPC', vpcProps);
+	// 	const vpc = new ProvaVpcStack(app, config.namePrefix+'-VPC', vpcProps);
 
-		if (config.includeEc2) {
-			const ec2Props = Object.assign({}, config, {
-				vpcId: vpc.vpcId,
-				publicSubnetId: vpc.publicSubnetId,
-				publicSubnetZone: vpc.publicSubnetZone
-			});
-			const tomcat = new ProvaEc2MachineStack(app, config.namePrefix+'-EC2', ec2Props);
-		}
-	}
+	// 	if (config.includeEc2) {
+	// 		const ec2Props = Object.assign({}, config, {
+	// 			vpcId: vpc.vpcId,
+	// 			publicSubnetId: vpc.publicSubnetId,
+	// 			publicSubnetZone: vpc.publicSubnetZone
+	// 		});
+	// 		const tomcat = new ProvaEc2MachineStack(app, config.namePrefix+'-EC2', ec2Props);
+	// 	}
+	// }
 }
 console.log('building app...');
 buildApp();

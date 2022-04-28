@@ -11,9 +11,8 @@ module.exports = {
 		'eu-south-1b',
 		'eu-south-1c'
 	],
-	namePrefix: 'T9312', 
-	sourceSecret: 's876fs8PiQaHGFdi8kjdh98',
+	namePrefix: 'TDEV11', 
 	tenants: [
-		'nord', 'sud', 'centro', 'isole'
+		'personale', 'amministrazione', 'delivery'
 	]
 }

@@ -43,3 +43,4 @@ serverside/prova-cdk/test1.7z
 *.secret.json
 cert_apache.7z
 **/cdk-outputs.json
+**/output/*

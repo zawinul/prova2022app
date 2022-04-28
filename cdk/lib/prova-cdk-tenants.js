@@ -48,9 +48,19 @@ class ProvaCdkTenantsStack extends cdk.Stack {
 				})
 			});
 
+			const roleName = (tenantName) => prefix+"-tm-role-" + tenantName;
+			//const roleArn  = tenantName=>`arn:aws:iam::${props.env.account}:role/${roleName(tenantName)}`;
+			let role = new iam.Role(this, roleName(tenant), {
+				assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
+				removalPolicy: cdk.RemovalPolicy.DESTROY,
+				roleName: roleName(tenant),
+				managedPolicies: [ accessPolicy ]	
+			});
+	
 			map[tenant] = {
 				accessPolicy,
-				bucket
+				bucket,
+				role
 			};
 		}
 

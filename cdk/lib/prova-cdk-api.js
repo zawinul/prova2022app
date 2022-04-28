@@ -14,12 +14,9 @@ class ProvaCdkApiStack extends cdk.Stack {
 		const lambdaFile = "api-lambda";
 		const lambdaFunction = "main";
 		const functionName = prefix+"-api-lambda-handler";
-		const bucketNames = props.tenants.map(x=>prefix.toLowerCase()+"-tenant-" + x);
 		const environment = {
-			account:props.env.account,
-			region:props.env.region,
-			buckets: JSON.stringify(bucketNames)
 		};
+
 		//console.log(JSON.stringify({environment, props}, null, 2));
 		const apiLambda = new lambda.Function(this, functionName, {
 			functionName,
@@ -37,24 +34,18 @@ class ProvaCdkApiStack extends cdk.Stack {
 		});
 
 		var apiName = prefix+'-TEST-API';
-		let api = new apigateway.RestApi(this, apiName, {
-			name: apiName+'1',
-			restApiName:apiName+'2',
+		let api = this.api = new apigateway.RestApi(this, apiName, {
+			name: apiName,
+			restApiName:apiName,
 			deploy: true,		
 			defaultIntegration: lambdaIntegration,
 		});
 
+		// TODO: verificare se serve veramente
 		const defz = api.root.addResource('{proxy+}');
 		defz.addMethod('ANY');
 
-		new cdk.CfnOutput(this, 'api-url-old', {
-			removalPolicy: cdk.RemovalPolicy.RETAIN,
-
-			value: `https://${api.restApiId}.execute-api.${this.region}.amazonaws.com/`,
-		});
-
 		new cdk.CfnOutput(this, 'api-url', {
-			removalPolicy: cdk.RemovalPolicy.RETAIN,
 			value: api.url,
 			exportName: 'mainApiURL'
 		});

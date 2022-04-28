@@ -1,7 +1,6 @@
+const AWS = require('aws-sdk');
 const https = require('https');
 const crypto = require('crypto');
-const querystring = require('querystring');
-const jose = require('jose');
  
 const tojson = x=>JSON.stringify(x,null,2);
 
@@ -77,7 +76,51 @@ async function generateCodeChallenge(codeVerifier) {
 
 	return hash;
 }	
+
+let _lambdaClient;
+async function callCacheLambda(cmd) {
+	console.log('callCacheLambda '+JSON.stringify(cmd));
+	if (!_lambdaClient) 
+		_lambdaClient = new AWS.Lambda({ region: process.env.cacheLambdaRegion });
+	let params = {
+		FunctionName: process.env.cacheLambdaName,
+		Payload: JSON.stringify(cmd),
+	}
+	var lambdaResult = await _lambdaClient.invoke(params).promise();
+	console.log('cacheLambda result: '+JSON.stringify(lambdaResult));
+	return lambdaResult.Payload?JSON.parse(lambdaResult.Payload):null;
+}
+
+async function cacheSet(key, value, timeToLiveMs) {
+	let cmd={
+		function:'set', 
+		key, value, timeToLiveMs
+	};
+	var lambdaResult = await callCacheLambda(cmd);
+	return lambdaResult;
+}
 	
+
+async function cacheGet(key) {
+	let cmd={
+		function:'get', 
+		key
+	};
+	var lambdaResult = await callCacheLambda(cmd);
+	console.log({tmUtilsGetCacheLambdaResult:{lambdaResult}});
+	return lambdaResult;
+}
+
+
+async function cacheDelete(key) {
+	let cmd={
+		function:'delete', 
+		key
+	};
+	var lambdaResult = await callCacheLambda(cmd);
+	console.log({tmCacheDeleteLambdaResult:{lambdaResult}});
+	return lambdaResult;
+}
 
 module.exports = {
 	doHttpsRequest,
@@ -86,5 +129,8 @@ module.exports = {
 	btoa,
 	now,
 	generateRandomString,
-	generateCodeChallenge
+	generateCodeChallenge,
+	cacheSet,
+	cacheGet,
+	cacheDelete
 };

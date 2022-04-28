@@ -4,7 +4,7 @@ const lambda = require("aws-cdk-lib/aws-lambda");
 const db = require("aws-cdk-lib/aws-dynamodb");
 //const cdk  = require("aws-cdk-lib/core");
 
-class ProvaCdkTicketMachineStack extends cdk.Stack {
+class ProvaCdkCacheStack extends cdk.Stack {
 
 	constructor(scope, id, props) {
 		//console.log(JSON.stringify({props},null,2))
@@ -22,7 +22,7 @@ class ProvaCdkTicketMachineStack extends cdk.Stack {
 		const lambdaFolder = lambda.Code.fromAsset("lambda/cache");
 		const lambdaFile = "cache-lambda";
 		const lambdaFunction = "main";
-		const functionName = this.lambdaName = prefix+"-cache-handler";
+		const functionName = props.cacheLambdaName;
 		
 		this.lambda = new lambda.Function(this, functionName, {
 			functionName,
@@ -40,9 +40,28 @@ class ProvaCdkTicketMachineStack extends cdk.Stack {
 
 		cacheTable.grantReadWriteData(this.lambda.grantPrincipal);
 
+		let arn = this.lambda.resourceArnsForGrantInvoke;
+		let policyName = prefix+"-invoke-cache-policy";
+
+		this.canInvoke = new iam.ManagedPolicy(this, policyName, {
+			managedPolicyName: policyName,
+			policyName,
+			statements:[
+				new iam.PolicyStatement({ 
+					hasPrincipal: false,
+					hasResource:true,
+					actions: ['lambda:InvokeFunction'],
+					resources: [arn]
+				})
+			],
+			effect: iam.Effect.ALLOW,
+			//user:new iam.ServicePrincipal('lambda.amazonaws.com')
+		});
+
+
 	}
 }
 
 
 
-module.exports = ProvaCdkTicketMachineStack;
+module.exports = ProvaCdkCacheStack;

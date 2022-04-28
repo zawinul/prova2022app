@@ -9,36 +9,39 @@ let actions = {}
 
 actions.clean = async function(event) {
 	var result = await cache.clean();
-	return { statusCode: 200, body: result};
+	return result;
 }
 
 actions.get = async function(event) {
-	var value = await cache.get(event.key);
-	return { statusCode: 200, body: value };
+	var result = await cache.get(event.key);
+	return result;
 }
 
 actions.set = async function(event) {
 	var result = cache.set(event.key, event.value, event.timeToLiveMs);
-	return { statusCode: 200, body: result};
+	return result;
 }
-
-
 
 actions.reset = async function(event) {
 	var result = await cache.reset();
-	return { statusCode: 200, body: result};
+	return result;
+}
+
+actions.delete = async function(event) {
+	var result = await cache.delete(event.key);
+	return result;
 }
 
 actions.changeExpiration = async function(event) {
 	var result = cache.changeExpiration(event.key, event.timestamp);
-	return { statusCode: 200, body: result};
+	return result;
 }
 
 
 let cache = cacheFactory();
 
 exports.main = async (event, context) => {
-	console.log(JSON.stringify({lambdaevent:event},null,2));
+	console.log(JSON.stringify({cacheLambdaEvent:event}));
 	try {
 		let ret = actions[event.function](event);
 		return ret;
